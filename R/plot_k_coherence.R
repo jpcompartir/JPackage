@@ -18,4 +18,3 @@ plot_k_coherence <- function(lda){
     ggplot2::scale_x_continuous(breaks = unique(coherence$k))
 }
 
-
