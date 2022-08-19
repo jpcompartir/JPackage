@@ -2,23 +2,23 @@
 % Please edit documentation in R/par_fit_LDAs.R
 \name{par_fit_LDAs}
 \alias{par_fit_LDAs}
-\title{Parallelised fit_LDAs function + coherence included}
+\title{Parallelised fit_LDAs function + coherence included.}
 \usage{
 par_fit_LDAs(dtms, k_opts = 2:3, iter_opts = 2000, coherence_n = 10)
 }
 \arguments{
-\item{dtms}{Document Term Matrix=}
+\item{dtms}{A nested tibble where each row is a dtm}
 
-\item{k_opts}{Number of topics to generate}
+\item{k_opts}{vector of the different values of k to fit an LDA model with (k = number of topics)}
 
-\item{iter_opts}{Number of iterations for Gibbs sampler}
+\item{iter_opts}{NA vector of the different values of iter to fit an LDA model with}
 
-\item{coherence_n}{Number of words to calculate cohernece fron}
+\item{coherence_n}{Number of words to calculate coherence from}
 }
 \value{
-tibble
+A nested tibble in which each row contains an LDA model.
 }
 \description{
-To access fast processing in parallel, load the future library and call:
-plan(multisession(workers = availableCores()))
+Fits multiple LDA models (one for each combination of the supplied parameters)
+This is generally faster than fit_LDAs, the larger the dataset, the larger the benefit.
 }
