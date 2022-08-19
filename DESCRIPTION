@@ -12,9 +12,10 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.0
 Imports: 
     dplyr,
+    DT,
     furrr,
     future,
     generics,
@@ -25,8 +26,10 @@ Imports:
     magrittr,
     Matrix,
     ParseR,
+    plotly,
     purrr,
     rlang,
+    shiny,
     stats,
     stringr,
     textmineR,
