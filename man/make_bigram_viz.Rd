@@ -4,7 +4,7 @@
 \alias{make_bigram_viz}
 \title{Plot a bigram network}
 \usage{
-make_bigram_viz(data, text_var = mention_content, top_n = 50, min = 10)
+make_bigram_viz(data, text_var = mention_content, top_n = 50, min = 10, ...)
 }
 \arguments{
 \item{data}{Data frame or tibble object}
