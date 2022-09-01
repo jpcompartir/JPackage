@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 # JPackage
 
@@ -24,3 +25,7 @@ library(JPackage)
 ## basic example code
 ```
 
+=======
+# JPackage
+personal functions for analysis, liable to break and/or be changed or removed at any time, enter with caution!
+>>>>>>> 27207bf5311f2380d1e3b3afc6096f561dd8ee67
