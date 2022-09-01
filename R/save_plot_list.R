@@ -7,5 +7,5 @@
 #' @export
 #'
 save_plot_list <- function(plot_list, plot_type = "bigram"){
-  lapply(names(plot_list),function(x) ggplot2::ggsave(filename = paste(plot_type, "_", x, ".png", sep = ""), bg = "white", plot = bigrams_list[[x]]))
+  lapply(names(plot_list),function(x) ggplot2::ggsave(filename = paste(plot_type, "_", x, ".png", sep = ""), bg = "white", plot = plot_list[[x]]))
 }
