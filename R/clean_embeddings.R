@@ -7,7 +7,7 @@
 #'
 clean_embeds <- function(embeds){
   embeds <- embeds %>%
-    dplyr::select(-1) %>%
+    dplyr::select(-document) %>%
     janitor::clean_names()
 
   names(embeds) <- stringr::str_replace_all(names(embeds), "x", "dim_")
