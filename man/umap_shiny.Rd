@@ -4,7 +4,7 @@
 \alias{umap_shiny}
 \title{Builds a Shiny app that can be used to label embedded texts quickly}
 \usage{
-umap_shiny(data, text_var, colour_var, ...)
+umap_shiny(data, text_var, colour_var, size = 2, umap_height = 600, ...)
 }
 \arguments{
 \item{data}{Your data frame, must have a V1 and V2 variable (2d UMAP output)}
@@ -12,6 +12,10 @@ umap_shiny(data, text_var, colour_var, ...)
 \item{text_var}{Text variable}
 
 \item{colour_var}{Variable colur should be mapped to}
+
+\item{size}{The size of each point in the UMAP plot}
+
+\item{umap_height}{total height of UMAP plot}
 
 \item{...}{currently unused, may go to select ahead of \code{dataTableOutput()}}
 }
