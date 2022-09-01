@@ -25,7 +25,5 @@ make_top_terms_table <- function(df, group_var = cluster_name, text_var = mentio
                  LimpiaR::limpiar_spaces(!!text_quo) %>%
                  tidytext::unnest_tokens(words, !! text_sym)) %>%
     purrr::reduce(bind_rows) %>%
-    dplyr::count({{group_var}}, words, sort = TRUE) %>%
-    dplyr::mutate(!!group_quo := stringr::str_replace_all(!! group_sym, "_", " "),
-                  !!group_quo := stringr::str_to_title(!! group_sym))
+    dplyr::count({{group_var}}, words, sort = TRUE)
 }
