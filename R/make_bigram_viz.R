@@ -9,6 +9,9 @@
 #' @export
 
 make_bigram_viz <- function(data, text_var = mention_content, top_n = 50, min = 10, ...){
+
+  require("ParseR")
+
   data %>%
     ParseR::count_ngram(text_var = {{text_var }}, top_n = top_n, min_freq = min, ...)%>%
     purrr::pluck("viz")%>%
