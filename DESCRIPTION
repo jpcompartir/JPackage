@@ -25,7 +25,6 @@ Imports:
     lubridate,
     magrittr,
     Matrix,
-    ParseR,
     plotly,
     purrr,
     rlang,

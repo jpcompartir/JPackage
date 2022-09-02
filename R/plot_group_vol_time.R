@@ -7,7 +7,7 @@
 #' @param nrow How many rows the plot should be shown in
 #'
 #' @return ggplot object of facetted bar charts
-#'
+#' @export
 plot_group_vol_time <- function(df, group_var = group, date_var = date, unit = "week", nrow = 2){
 
 
