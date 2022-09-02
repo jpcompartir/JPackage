@@ -8,9 +8,9 @@
 #' @param iter_opts NA vector of the different values of iter to fit an LDA model with
 #' @param coherence_n Number of words to calculate coherence from
 #' @return A nested tibble in which each row contains an LDA model.
-#' @usage par_fit_LDAs(dtms, k_opts = 2:3, iter_opts = 2000, coherence_n = 10)
+#' @usage old_par_fit_LDAs(dtms, k_opts = 2:3, iter_opts = 2000, coherence_n = 10)
 #' @export
-par_fit_LDAs <- function(dtms,
+old_par_fit_LDAs <- function(dtms,
                          k_opts = 2:3,
                          iter_opts = 2000,
                          coherence_n = 10){
