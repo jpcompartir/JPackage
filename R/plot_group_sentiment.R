@@ -17,6 +17,6 @@ plot_group_sentiment <- function(df, group_var = topic, sentiment_var = sentimen
     ggplot2::geom_col() +
     HelpR::theme_microsoft_discrete() +
     ggplot2::theme(legend.position = "bottom") +
-    ggplot2::labs(fill = NULL, x = NULL, y = "% of Posts")
+    ggplot2::labs(fill = NULL, y = NULL, x = "% of Posts")
 
 }

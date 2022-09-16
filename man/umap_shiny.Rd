@@ -4,7 +4,15 @@
 \alias{umap_shiny}
 \title{Builds a Shiny app that can be used to label embedded texts quickly}
 \usage{
-umap_shiny(data, text_var, colour_var, size = 2, umap_height = 600, ...)
+umap_shiny(
+  data,
+  text_var,
+  colour_var,
+  size = 2,
+  umap_height = 600,
+  type = "scattergl",
+  ...
+)
 }
 \arguments{
 \item{data}{Your data frame, must have a V1 and V2 variable (2d UMAP output)}
@@ -16,6 +24,8 @@ umap_shiny(data, text_var, colour_var, size = 2, umap_height = 600, ...)
 \item{size}{The size of each point in the UMAP plot}
 
 \item{umap_height}{total height of UMAP plot}
+
+\item{type}{a string instructing what type of trace, "scattergl" can handle more points.}
 
 \item{...}{currently unused, may go to select ahead of \code{dataTableOutput()}}
 }

@@ -6,12 +6,13 @@
 #' @param ... currently unused, may go to select ahead of `dataTableOutput()`
 #' @param size The size of each point in the UMAP plot
 #' @param umap_height total height of UMAP plot
+#' @param type a string instructing what type of trace, "scattergl" can handle more points.
 #'
 #' @return shiny app
 #' @export
 #'
 
-umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600,...){
+umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600, type = "scattergl",...){
 
   text_sym <- rlang::ensym(text_var)
   colour_sym <- rlang::ensym(colour_var)
@@ -41,7 +42,7 @@ umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600,..
 
     output$umapPlot = plotly::renderPlotly({
       #cluster can be changed
-      plotly::plot_ly(data = data, x = ~V1, y = ~V2, color = ~colour_var,
+      plotly::plot_ly(data = data, x = ~V1, y = ~V2, type = type, color = ~colour_var,
                       #make sure mention_content = text variable of your data
                       text = ~paste("<br> Post:", text_var),
                       hoverinfo = "text", marker = list(size = size), height = umap_height) %>%
