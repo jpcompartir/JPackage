@@ -7,6 +7,7 @@
 #' @param min_freq The minimum number of times a term must be observed to be considered.
 #' @param hashtags Should hashtags be included?
 #' @param mentions Should mentions be included?
+#'
 #' @return A nested tibble in which each row contains a document-term matrix.
 #'
 #' @usage make_DTMs_parallel(df, text_var, min_freq = 10, hashtags = FALSE, mentions = FALSE)
