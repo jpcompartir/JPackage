@@ -26,7 +26,7 @@ umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600, t
     shiny::downloadButton("downloadData", "Download"),
     shiny::textInput("fileName", "File Name", "mydata"),
     shiny::hr(),
-    fluidRow(
+    shiny::fluidRow(
       shiny::column(2, shiny::sliderInput( "x1","V1 Greater than", -50, 20, -20)),
       shiny::column(2, shiny::sliderInput("x2","V1 Less than",  -10, 50, 20)),
       shiny::column(2, shiny::sliderInput( "y1","V1 Greater than", -50, 20, -20)),
