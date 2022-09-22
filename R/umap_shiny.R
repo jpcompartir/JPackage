@@ -24,6 +24,14 @@ umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600, t
   ui <- shiny::fluidPage(
 
     shiny::downloadButton("downloadData", "Download"),
+    shiny::textInput("fileName", "File Name", "mydata"),
+    shiny::hr(),
+    fluidRow(
+      shiny::column(2, shiny::sliderInput( "x1","V1 Greater than", -50, 20, -20)),
+      shiny::column(2, shiny::sliderInput("x2","V1 Less than",  -10, 50, 20)),
+      shiny::column(2, shiny::sliderInput( "y1","V1 Greater than", -50, 20, -20)),
+      shiny::column(2, shiny::sliderInput( "y2","V2 Less than", -10, 50, 20))
+    ),
     shiny::hr(),
 
     shiny::fluidRow(
@@ -42,10 +50,12 @@ umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600, t
 
     output$umapPlot = plotly::renderPlotly({
       #cluster can be changed
-      plotly::plot_ly(data = data, x = ~V1, y = ~V2, type = type, color = ~colour_var,
-                      #make sure mention_content = text variable of your data
-                      text = ~paste("<br> Post:", text_var),
-                      hoverinfo = "text", marker = list(size = size), height = umap_height) %>%
+      data %>%
+        dplyr::filter(V1 > input$x1, V1 < input$x2, V2 > input$y1, V2 < input$y2) %>%
+        plotly::plot_ly(x = ~V1, y = ~V2, type = type, color = ~colour_var,
+                        #make sure mention_content = text variable of your data
+                        text = ~paste("<br> Post:", text_var),
+                        hoverinfo = "text", marker = list(size = size), height = umap_height) %>%
         plotly::layout(dragmode = "select") %>%
         plotly::event_register(event = "plotly_selected")
     })
@@ -73,9 +83,9 @@ umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600, t
     })
 
 
-    output$downloadData <- shiny::downloadHandler(
+    output$downloadData <- downloadHandler(
       filename = function() {
-        paste("filename","_", Sys.Date(), ".csv", sep="")
+        paste0(input$fileName, ".csv")
       },
       content = function(file) {
         utils::write.csv(df_copy, file)
@@ -85,7 +95,4 @@ umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600, t
   }
 
   shiny::shinyApp(ui, server)
-
-
-
 }
