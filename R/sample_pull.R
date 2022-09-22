@@ -9,6 +9,6 @@
 #'
 sample_pull <- function(df = df, variable = mention_content, n = 10 ){
   df %>%
-    sample_n(n)%>%
-    pull({{variable}})
+    dplyr::sample_n(n)%>%
+    dplyr::pull({{variable}})
 }

@@ -6,8 +6,10 @@
 \usage{
 umap_shiny(
   data,
-  text_var,
-  colour_var,
+  x_var = V1,
+  y_var = V2,
+  text_var = mention_content,
+  colour_var = cluster,
   size = 2,
   umap_height = 600,
   type = "scattergl",
@@ -15,7 +17,11 @@ umap_shiny(
 )
 }
 \arguments{
-\item{data}{Your data frame, must have a V1 and V2 variable (2d UMAP output)}
+\item{data}{Data frame or tibble}
+
+\item{x_var}{Variable with x axis co-ordinates}
+
+\item{y_var}{Variable with y axis co-ordinates}
 
 \item{text_var}{Text variable}
 

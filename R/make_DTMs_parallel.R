@@ -10,14 +10,6 @@
 #'
 #' @return A nested tibble in which each row contains a document-term matrix.
 #'
-#' @usage make_DTMs_parallel(df, text_var, min_freq = 10, hashtags = FALSE, mentions = FALSE)
-#' @examples make_DTMs_parallel(
-#'  df = sprinklr_export,
-#'  text_var = Message,
-#'  min_freq = 25,
-#'  hashtags = FALSE,
-#'  mentions = FALSE
-#' )
 #' @export
 #'
 make_DTMs_parallel <- function(df,
@@ -25,12 +17,12 @@ make_DTMs_parallel <- function(df,
                                min_freq = 10,
                                hashtags = FALSE,
                                mentions = FALSE) {
-  future::plan(future::multisession(workers = availableCores() -1))
+  future::plan(future::multisession(workers = future::availableCores() -1))
   # Clean the text - this part was edited by Jack to avoid mismatching document IDs (Mar 28th 2022)
   clean_df <- df %>%
     tibble::rowid_to_column(var = "message_id") %>%
     dplyr::mutate(row_id = dplyr::row_number(),
-                  cuts = cut(row_id, 7)) %>%
+                  cuts = base::cut(row_id, 7)) %>%
     dplyr::mutate(message = {{text_var}}) %>%
     dplyr::select(message, message_id, cuts) %>%
     dplyr::filter(!is.na(message))%>%

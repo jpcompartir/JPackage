@@ -13,7 +13,7 @@ plot_group_sentiment <- function(df, group_var = topic, sentiment_var = sentimen
     dplyr::count({{group_var}}, {{sentiment_var}}) %>%
     dplyr::add_count({{group_var}}, wt = n) %>%
     dplyr::mutate(percent = n/nn * 100) %>%
-    ggplot2::ggplot(aes(y = {{group_var}}, x = percent, fill = {{sentiment_var}}))+
+    ggplot2::ggplot(ggplot2::aes(y = {{group_var}}, x = percent, fill = {{sentiment_var}}))+
     ggplot2::geom_col() +
     HelpR::theme_microsoft_discrete() +
     ggplot2::theme(legend.position = "bottom") +

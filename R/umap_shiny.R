@@ -1,6 +1,8 @@
 #' Builds a Shiny app that can be used to label embedded texts quickly
 #'
-#' @param data Your data frame, must have a V1 and V2 variable (2d UMAP output)
+#' @param data Data frame or tibble
+#' @param x_var Variable with x axis co-ordinates
+#' @param y_var Variable with y axis co-ordinates
 #' @param text_var Text variable
 #' @param colour_var Variable colur should be mapped to
 #' @param ... currently unused, may go to select ahead of `dataTableOutput()`
@@ -12,13 +14,13 @@
 #' @export
 #'
 
-umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600, type = "scattergl",...){
+umap_shiny <- function(data, x_var = V1, y_var = V2, text_var = mention_content, colour_var = cluster, size = 2, umap_height = 600, type = "scattergl",...){
 
   text_sym <- rlang::ensym(text_var)
   colour_sym <- rlang::ensym(colour_var)
 
   data <- dplyr::mutate(data, plot_id = dplyr::row_number())
-  data <- dplyr::select(data, plot_id, V1, V2, {{text_var}}, {{colour_var}})
+  data <- dplyr::select(data, plot_id, {{x_var}},{{y_var}}, {{text_var}}, {{colour_var}})
   data <- dplyr::rename(data, text_var = 4, colour_var = 5)
 
   ui <- shiny::fluidPage(
@@ -83,7 +85,7 @@ umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600, t
     })
 
 
-    output$downloadData <- downloadHandler(
+    output$downloadData <- shiny::downloadHandler(
       filename = function() {
         paste0(input$fileName, ".csv")
       },

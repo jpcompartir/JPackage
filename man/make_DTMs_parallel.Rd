@@ -4,7 +4,13 @@
 \alias{make_DTMs_parallel}
 \title{Run the \code{make_DTMs} function logic but with parallel processing!}
 \usage{
-make_DTMs_parallel(df, text_var, min_freq = 10, hashtags = FALSE, mentions = FALSE)
+make_DTMs_parallel(
+  df,
+  text_var,
+  min_freq = 10,
+  hashtags = FALSE,
+  mentions = FALSE
+)
 }
 \arguments{
 \item{df}{A data frame or tibble where each row is a separate post.}
@@ -22,13 +28,4 @@ A nested tibble in which each row contains a document-term matrix.
 }
 \description{
 Function does not implictly clean the text variable like \code{make_DTMs}
-}
-\examples{
-make_DTMs_parallel(
- df = sprinklr_export,
- text_var = Message,
- min_freq = 25,
- hashtags = FALSE,
- mentions = FALSE
-)
 }
