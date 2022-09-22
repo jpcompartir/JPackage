@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 # JPackage
 
 <!-- badges: start -->
