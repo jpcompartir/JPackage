@@ -1,20 +1,24 @@
 #' Builds a Shiny app that can be used to label embedded texts quickly
 #'
 #' @param data Data frame or tibble
-#' @param x_var Variable with x axis co-ordinates
-#' @param y_var Variable with y axis co-ordinates
 #' @param text_var Text variable
 #' @param colour_var Variable colur should be mapped to
-#' @param ... currently unused, may go to select ahead of `dataTableOutput()`
+#' @param x_var Variable with x axis co-ordinates
+#' @param y_var Variable with y axis co-ordinates
 #' @param size The size of each point in the UMAP plot
 #' @param umap_height total height of UMAP plot
 #' @param type a string instructing what type of trace, "scattergl" can handle more points.
+#' @param ... currently unused, may go to select ahead of `dataTableOutput()`
+#'
 #'
 #' @return shiny app
 #' @export
+#' @examples
+#' \dontrun{
+#' umap_shiny(data = df, text_var = mention_content, colour_var = topic, x_var = V1, y_var = V2)
+#' }
 #'
-
-umap_shiny <- function(data, x_var = V1, y_var = V2, text_var = mention_content, colour_var = cluster, size = 2, umap_height = 600, type = "scattergl",...){
+umap_shiny <- function(data, text_var = mention_content, colour_var = cluster, x_var = V1, y_var = V2, size = 2, umap_height = 600, type = "scattergl",...){
 
   text_sym <- rlang::ensym(text_var)
   colour_sym <- rlang::ensym(colour_var)
@@ -26,12 +30,15 @@ umap_shiny <- function(data, x_var = V1, y_var = V2, text_var = mention_content,
   ui <- shiny::fluidPage(
 
     shiny::downloadButton("downloadData", "Download"),
-    shiny::textInput("fileName", "File Name", "mydata"),
+    shiny::fluidRow(
+      shiny::column(3, shiny::textInput("fileName", "File Name", "mydata")),
+      shiny::column(5, shiny::numericInput("n", "Number of posts per page of table", 25, min = 1, max = 100)),
+    ),
     shiny::hr(),
     shiny::fluidRow(
       shiny::column(2, shiny::sliderInput( "x1","V1 Greater than", -50, 20, -20)),
       shiny::column(2, shiny::sliderInput("x2","V1 Less than",  -10, 50, 20)),
-      shiny::column(2, shiny::sliderInput( "y1","V1 Greater than", -50, 20, -20)),
+      shiny::column(2, shiny::sliderInput( "y1","V2 Greater than", -50, 20, -20)),
       shiny::column(2, shiny::sliderInput( "y2","V2 Less than", -10, 50, 20))
     ),
     shiny::hr(),
@@ -81,7 +88,7 @@ umap_shiny <- function(data, x_var = V1, y_var = V2, text_var = mention_content,
 
       df_copy <<- df
 
-      DT::datatable(df, filter = "top", options = list(pageLength = 100))
+      DT::datatable(df, filter = "top", options = list(pageLength = input$n))
     })
 
 
@@ -98,3 +105,6 @@ umap_shiny <- function(data, x_var = V1, y_var = V2, text_var = mention_content,
 
   shiny::shinyApp(ui, server)
 }
+
+
+

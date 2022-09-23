@@ -6,10 +6,10 @@
 \usage{
 umap_shiny(
   data,
-  x_var = V1,
-  y_var = V2,
   text_var = mention_content,
   colour_var = cluster,
+  x_var = V1,
+  y_var = V2,
   size = 2,
   umap_height = 600,
   type = "scattergl",
@@ -19,13 +19,13 @@ umap_shiny(
 \arguments{
 \item{data}{Data frame or tibble}
 
-\item{x_var}{Variable with x axis co-ordinates}
-
-\item{y_var}{Variable with y axis co-ordinates}
-
 \item{text_var}{Text variable}
 
 \item{colour_var}{Variable colur should be mapped to}
+
+\item{x_var}{Variable with x axis co-ordinates}
+
+\item{y_var}{Variable with y axis co-ordinates}
 
 \item{size}{The size of each point in the UMAP plot}
 
@@ -40,4 +40,10 @@ shiny app
 }
 \description{
 Builds a Shiny app that can be used to label embedded texts quickly
+}
+\examples{
+\dontrun{
+umap_shiny(data = df, text_var = mention_content, colour_var = topic, x_var = V1, y_var = V2)
+}
+
 }
