@@ -88,7 +88,8 @@ umap_shiny <- function(data, text_var = mention_content, colour_var = cluster, x
 
       df_copy <<- df
 
-      DT::datatable(df, filter = "top", options = list(pageLength = input$n))
+      DT::datatable(df, filter = "top", options = list(pageLength = input$n,
+                                                       dom = '<"top" p>'))
     })
 
 
