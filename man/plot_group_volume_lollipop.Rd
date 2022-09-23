@@ -19,3 +19,13 @@ a ggplot object
 \description{
 Quick plot for a topic (or any group) volume lollipop chart
 }
+\examples{
+\dontrun{
+Example 1:
+plot_group_volume_lollipop(df, group_var = topic, project_name = "My Private Project")
+
+Example 2:
+plot_group_volume_lollipop(df, group_var = social_network,
+project_name = "Sportswear Landscape Analysis")
+}
+}

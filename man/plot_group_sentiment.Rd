@@ -4,7 +4,13 @@
 \alias{plot_group_sentiment}
 \title{Quickly plot group sentiment distributions as a perentage}
 \usage{
-plot_group_sentiment(df, group_var = topic, sentiment_var = sentiment)
+plot_group_sentiment(
+  df,
+  group_var = topic,
+  sentiment_var = sentiment,
+  type = "percent",
+  title = "Grouped Sentiment Chart"
+)
 }
 \arguments{
 \item{df}{data frame}
@@ -12,10 +18,23 @@ plot_group_sentiment(df, group_var = topic, sentiment_var = sentiment)
 \item{group_var}{Grouping variable, e.g. country, topic, cluster}
 
 \item{sentiment_var}{Sentiment variable (categorical)}
+
+\item{type}{Whether the plot should be of volume or py percentage. Acccepts "percent" or "volume"}
+
+\item{title}{The title of the plot, entered as a string.}
 }
 \value{
 Ggplot stacked bar chart with x and y coords flipped
 }
 \description{
 Quickly plot group sentiment distributions as a perentage
+}
+\examples{
+\dontrun{
+Example 1:
+plot_group_sentiment(df, group_var = platform, sentiment_var = sentiment, type = "percent")
+
+Example 2:
+plot_group_sentiment(df, group_var = topic, sentiment_var = sentiment, type = "volume")
+}
 }

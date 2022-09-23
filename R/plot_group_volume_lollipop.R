@@ -6,7 +6,15 @@
 #'
 #' @return a ggplot object
 #' @export
+#' @examples
+#' \dontrun{
+#' Example 1:
+#' plot_group_volume_lollipop(df, group_var = topic, project_name = "My Private Project")
 #'
+#' Example 2:
+#' plot_group_volume_lollipop(df, group_var = social_network,
+#' project_name = "Sportswear Landscape Analysis")
+#' }
 plot_group_volume_lollipop <- function(df, group_var = name, project_name = "project"){
 
   df %>%

@@ -1,12 +1,10 @@
 #' Run the `make_DTMs` function logic but with parallel processing!
 #'
-#' Function does not implictly clean the text variable like `make_DTMs`
+#' Function does not implicitly clean the text variable like `make_DTMs`
 #'
 #' @param df A data frame or tibble where each row is a separate post.
 #' @param text_var The variable containing the text which you want to explore.
 #' @param min_freq The minimum number of times a term must be observed to be considered.
-#' @param hashtags Should hashtags be included?
-#' @param mentions Should mentions be included?
 #'
 #' @return A nested tibble in which each row contains a document-term matrix.
 #'

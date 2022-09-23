@@ -4,10 +4,12 @@
 \alias{clean_embeds}
 \title{Quickly reformat a sentence transformers embedding output}
 \usage{
-clean_embeds(embeds)
+clean_embeds(embeds, ...)
 }
 \arguments{
-\item{embeds}{an n-dimensional data frame with an index column (Pandas output without index = False)}
+\item{embeds}{an n-dimensional data frame with an index column}
+
+\item{...}{columns that should be dropped, i.e. document or index column}
 }
 \value{
 data frame with column names cleaned and index column removed

@@ -18,14 +18,10 @@ make_DTMs_parallel(
 \item{text_var}{The variable containing the text which you want to explore.}
 
 \item{min_freq}{The minimum number of times a term must be observed to be considered.}
-
-\item{hashtags}{Should hashtags be included?}
-
-\item{mentions}{Should mentions be included?}
 }
 \value{
 A nested tibble in which each row contains a document-term matrix.
 }
 \description{
-Function does not implictly clean the text variable like \code{make_DTMs}
+Function does not implicitly clean the text variable like \code{make_DTMs}
 }
