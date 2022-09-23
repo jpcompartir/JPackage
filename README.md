@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 # JPackage
 
 <!-- badges: start -->
@@ -15,12 +13,6 @@ You can install the development version of JPackage from [GitHub](https://github
 # install.packages("devtools")
 devtools::install_github("jpcompartir/JPackage")
 ```
-
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-
 
 # JPackage
 personal functions for analysis, liable to break and/or be changed or removed at any time, enter with caution!
