@@ -91,7 +91,7 @@ umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600, x
       df_copy <<- df
 
       DT::datatable(df, filter = "top", options = list(pageLength = input$n,
-                                                       dom = '<"top" p>'))
+                                                       dom = '<"top" pif>'))
     })
 
 
