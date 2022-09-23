@@ -35,7 +35,6 @@ umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600, x
       shiny::column(2, shiny::sliderInput( "y2","V2 Less than", -10, 50, 20))
     ),
     shiny::fluidRow(
-      shiny::column(3, shiny::textInput("fileName", "File Name", "mydata")),
       shiny::column(3, shiny::numericInput("n", "Number of posts per page of table", 25, min = 1, max = 100)),
       shiny::column(6, shiny::selectizeInput("cluster", "Select which clusters to hide", choices = unique(data[,5]), multiple = TRUE))
     ),
