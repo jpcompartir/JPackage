@@ -35,8 +35,9 @@ umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600, x
       shiny::column(2, shiny::sliderInput( "y2","V2 Less than", -10, 50, 20))
     ),
     shiny::fluidRow(
-      shiny::column(3, shiny::numericInput("n", "Number of posts per page of table", 25, min = 1, max = 100)),
-      shiny::column(6, shiny::selectizeInput("cluster", "Select which clusters to hide", choices = unique(data[,5]), multiple = TRUE))
+      shiny::column(2, shiny::numericInput("n", "Number of posts per page of table", 25, min = 1, max = 100)),
+      shiny::column(2, shiny::selectizeInput("cluster", "Select which clusters to hide", choices = unique(data[,5]), multiple = TRUE)),
+      shiny::column(2, shiny::textInput("Regex", "Pattern to filter",  value = NULL))
     ),
     shiny::hr(),
     shiny::fluidRow(
@@ -52,11 +53,18 @@ umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600, x
 
   server <- function(input, output, session){
 
+    pattern <- shiny::reactiveVal({})
+
+    shiny::observeEvent(input$Regex, {
+      pattern(input$Regex)
+    })
+
 
     reactive_data <- reactive({
       data %>%
         dplyr::filter(V1 > input$x1, V1 < input$x2, V2 > input$y1, V2 < input$y2) %>%
         dplyr::filter(!colour_var %in% input$cluster) %>%
+        dplyr::filter(grepl(pattern(), text_var, ignore.case = TRUE)) %>%
         dplyr::mutate(plot_id = row_number())
     })
 
@@ -108,6 +116,7 @@ umap_shiny <- function(data,text_var, colour_var, size = 2, umap_height = 600, x
 
   shiny::shinyApp(ui, server)
 }
+
 
 
 
