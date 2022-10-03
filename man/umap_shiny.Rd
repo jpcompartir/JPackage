@@ -6,18 +6,20 @@
 \usage{
 umap_shiny(
   data,
-  text_var,
-  colour_var,
+  ...,
+  text_var = message,
+  colour_var = cluster,
   size = 2,
   umap_height = 600,
   x_var = V1,
   y_var = V2,
-  type = "scattergl",
-  ...
+  type = "scattergl"
 )
 }
 \arguments{
 \item{data}{Data frame or tibble}
+
+\item{...}{Sent to select, allows you to include additional columns\code{dataTableOutput()}}
 
 \item{text_var}{Text variable}
 
@@ -32,12 +34,23 @@ umap_shiny(
 \item{y_var}{Variable with y axis co-ordinates}
 
 \item{type}{a string instructing what type of trace, "scattergl" can handle more points.}
-
-\item{...}{currently unused, may go to select ahead of \code{dataTableOutput()}}
 }
 \value{
 shiny app
 }
 \description{
 Builds a Shiny app that can be used to label embedded texts quickly
+}
+\examples{
+\dontrun{
+Example 1:
+umap_shiny(data, permalink, sentiment, text_var = message, colour_var = cluster)
+
+Example 2:
+umap_shiny(data, text_var = text, colour_var = sentiment)
+
+Example 3:
+umap_shiny(data, text_var = mention_content, colour_var = entity, x_var = x, y_var = y)
+
+}
 }
