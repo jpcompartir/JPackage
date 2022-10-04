@@ -9,7 +9,7 @@
 #' @return faceted lollipops
 #' @export
 #'
-top_terms_plot <- function(top_terms_table, words_var = words, group_var = cluster_name, top_n = 15, nrow = 2){
+plot_top_terms <- function(top_terms_table, words_var = words, group_var = cluster_name, top_n = 15, nrow = 2){
 
   words_quo <- rlang::enquo(words_var)
   words_sym <- rlang::ensym(words_var)
