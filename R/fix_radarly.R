@@ -14,7 +14,7 @@ fix_radarly <- function(df){
     dplyr::rename(mention_content = text,
                   mention_url = permalink,
                   sentiment = tone)%>%
-    dplyr::mutate(date = lubridate::dmy_hms(date),
+    dplyr::mutate(date = lubridate::dmy_hm(date),
                   date = as.Date(date),
                   screen_name = dplyr::case_when(is.na(screen_name)~ "NA",
                                           TRUE ~ screen_name))%>%
