@@ -28,6 +28,7 @@
 umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size = 2,
                           umap_height = 600, x_var = V1, y_var = V2, type = "scattergl"){
 
+  #-----
   text_sym <- rlang::ensym(text_var)
   colour_sym <- rlang::ensym(colour_var)
 
@@ -42,14 +43,13 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
     shiny::hr(),
     shiny::fluidRow(
       shiny::column(2, shiny::sliderInput( "x1","V1 Range", -50, 50, c(-20, 20))),
-      # shiny::column(2, shiny::sliderInput("x2","V1 Less than",  -10, 50, 20)),
-      shiny::column(2, shiny::sliderInput( "y1","V2 Range", -50, 20, c(-20, 20)))
-      # shiny::column(2, shiny::sliderInput( "y2","V2 Less than", -10, 50, 20))
+      shiny::column(2, shiny::sliderInput( "y1","V2 Range", -50, 20, c(-20, 20))),
+
     ),
     shiny::fluidRow(
       shiny::column(3, shiny::numericInput("n", "Number of posts per page of table", 25, min = 1, max = 100)),
-      shiny::column(2, shiny::selectizeInput("cluster", "Select which clusters to hide", choices = unique(data[,5]), multiple = TRUE)),
-      shiny::column(2, shiny::textInput("Regex", "Pattern to filter",  value = NULL))
+      shiny::column(2, shiny::textInput("Regex", "Pattern to filter",  value = NULL)),
+      shiny::column(2, shiny::actionButton("delete", "Delete selections"))
     ),
     shiny::hr(),
     shiny::fluidRow(
@@ -65,26 +65,38 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
 
   server <- function(input, output, session){
 
+
     pattern <- shiny::reactiveVal({})
 
     shiny::observeEvent(input$Regex, {
       pattern(input$Regex)
     })
 
+    #Get the original IDs saved and save an object for later adding selected points to remove
+    remove_range <- shiny::reactiveValues(
+      keep_keys = data$original_id,
+      remove_keys = NULL
+    )
 
-    reactive_data <- reactive({
-      data %>%
+    #Update remove_range's values on delete button press
+    shiny::observeEvent(input$delete,{
+      req(length(remove_range$keep_keys) > 0)
+      remove_range$remove_keys <- selected_range()$key
+      remove_range$keep_keys <- remove_range$keep_keys[!remove_range$keep_keys %in% remove_range$remove_keys]
+
+    })
+
+    reactive_data <- shiny::reactive({
+
+      data <- data %>%
         dplyr::filter(V1 > input$x1[[1]], V1 < input$x1[[2]], V2 > input$y1[[1]], V2 < input$y1[[2]]) %>%
-        dplyr::filter(!colour_var %in% input$cluster) %>%
+        dplyr::filter(!colour_var %in% input$cluster,
+                      original_id %in% remove_range$keep_keys) %>%
         dplyr::filter(grepl(pattern(), text_var, ignore.case = TRUE)) %>%
         dplyr::mutate(plot_id = dplyr::row_number())
     })
 
     output$umapPlot = plotly::renderPlotly({
-
-      #Set key for later filtering
-      # key <- data$original_id
-
       #cluster can be changed
       reactive_data() %>%
         plotly::plot_ly(x = ~V1, y = ~V2, type = type, color = ~colour_var,
@@ -92,7 +104,7 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
                         #make sure mention_content = text variable of your data
                         text = ~paste("<br> Post:", text_var),
                         hoverinfo = "text", marker = list(size = size), height = umap_height) %>%
-        plotly::layout(dragmode = "select",
+        plotly::layout(dragmode = "lasso",
                        legend= list(itemsizing='constant')) %>%
         plotly::event_register(event = "plotly_selected")
     })
@@ -108,7 +120,6 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
     output$highlightedTable <- DT::renderDataTable({
 
       #Replacing pointNumber with a key allows for precise showing of points irrespective of variable input type.
-      # points <- selected_range()$pointNumber + 1
       key <- selected_range()$key
       key <- as.numeric(key)
 
@@ -117,14 +128,12 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
         #Select the columns you want to see from your data
         dplyr::select(plot_id, text_var, colour_var, original_id, ...)
 
-      df_copy <<- df
-
       DT::datatable(df, filter = "top", options = list(pageLength = input$n,
                                                        dom = '<"top" pif>'))
     })
 
 
-    output$downloadData <- downloadHandler(
+    output$downloadData <- shiny::downloadHandler(
       filename = function() {
         paste0(input$fileName, ".csv")
       },
@@ -137,3 +146,4 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
 
   shiny::shinyApp(ui, server)
 }
+
