@@ -130,13 +130,14 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
       df <- reactive_data() %>%
         dplyr::filter(original_id %in% key) %>%
         #Select the columns you want to see from your data
-        dplyr::select(`Original ID` = original_id, `Text` = text_var,
+        dplyr::select(`ID` = original_id, `Text` = text_var,
                       `Colour Variable` = colour_var,  ...)
 
       df_copy <<- df
       DT::datatable(df, filter = "top", options = list(pageLength = input$n,
-                                                       dom = '<"top" pif>'),
-                    style = "bootstrap")
+                                                       dom = '<"top" pif>', autoWidth = FALSE),
+                    style = "bootstrap", rownames = FALSE,
+                    caption = htmltools::tags$caption("Selected Mentions", style="color:white"))
     })
 
 
