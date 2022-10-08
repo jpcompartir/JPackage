@@ -37,21 +37,25 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
   data <- dplyr::rename(data, text_var = 4, colour_var = 5)
 
   ui <- shiny::fluidPage(
+    # shinythemes::themeSelector(),
+    theme = shinythemes::shinytheme(theme = "superhero"),
 
-    shiny::downloadButton("downloadData", "Download"),
-    shiny::textInput("fileName", "File Name", "mydata"),
-    shiny::hr(),
     shiny::fluidRow(
-      shiny::column(2, shiny::sliderInput( "x1","V1 Range", -50, 50, c(-20, 20))),
-      shiny::column(2, shiny::sliderInput( "y1","V2 Range", -50, 20, c(-20, 20))),
-
+      shiny::column(2, shiny::textInput("fileName", "File Name", "mydata")),
+      shiny::column(1, shiny::div(style = "margin-top: 20px;",shiny::downloadButton("downloadData", "Download", class = "btn btn-success")))
     ),
+    shiny::br(),
     shiny::fluidRow(
-      shiny::column(3, shiny::numericInput("n", "Number of posts per page of table", 25, min = 1, max = 100)),
+      shiny::column(2, shiny::sliderInput( "x1","V1 Range", -100, 100, c(-20, 20))),
+      shiny::column(2, shiny::sliderInput( "y1","V2 Range", -100, 100, c(-20, 20)))
+    ),
+    shiny::br(),
+    shiny::fluidRow(
       shiny::column(2, shiny::textInput("Regex", "Pattern to filter",  value = NULL)),
-      shiny::column(2, shiny::actionButton("delete", "Delete selections"))
+      shiny::column(2, shiny::numericInput("n", "Posts shown per page", 10, min = 1, max = 200)),
+      shiny::column(1, offset = 4, shiny::div(style = "margin-top: 20px;", shiny::actionButton("delete", "Delete selections", class = 'btn-danger')))
     ),
-    shiny::hr(),
+    shiny::br(),
     shiny::fluidRow(
       shiny::column(7,
                     plotly::plotlyOutput("umapPlot")
@@ -126,10 +130,13 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
       df <- reactive_data() %>%
         dplyr::filter(original_id %in% key) %>%
         #Select the columns you want to see from your data
-        dplyr::select(plot_id, text_var, colour_var, original_id, ...)
+        dplyr::select(`Original ID` = original_id, `Text` = text_var,
+                      `Colour Variable` = colour_var,  ...)
 
+      df_copy <<- df
       DT::datatable(df, filter = "top", options = list(pageLength = input$n,
-                                                       dom = '<"top" pif>'))
+                                                       dom = '<"top" pif>'),
+                    style = "bootstrap")
     })
 
 
@@ -146,4 +153,5 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
 
   shiny::shinyApp(ui, server)
 }
+
 
