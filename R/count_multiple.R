@@ -16,11 +16,8 @@ count_multiple <- function(df, ...){
   list_names <- sort(list_names)
 
   list_output <- df %>%
-    dplyr::group_by(name)%>%
-    tidyr::nest()%>%
-    dplyr::ungroup()%>%
     dplyr::group_split(name)%>%
-    purrr::map(., ~ .x %>% tidyr::unnest(cols = data)%>%
+    purrr::map(., ~ .x %>%
                  dplyr::count(value, sort = TRUE) %>%
                  dplyr::mutate(percent = 100 * n / sum(n)))
 
@@ -29,4 +26,3 @@ count_multiple <- function(df, ...){
   return(list_output)
 
 }
-
