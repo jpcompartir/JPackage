@@ -1,7 +1,7 @@
-#' Count multiple factors
+#' Count multiple variables of the same data type
 #'
-#' @param df Data frame and tibble object
-#' @param ... The variables you want to create individual tables for - unquoted.
+#' @param df Data frame or tibble object
+#' @param ... The variables you want to create individual tables for - unquoted and should be of the same data type.
 #'
 #' @return Summary frames which separately count inputted variables and add a percent column
 #' @export
