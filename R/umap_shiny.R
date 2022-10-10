@@ -33,7 +33,7 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
   colour_sym <- rlang::ensym(colour_var)
 
   data <- dplyr::mutate(data, plot_id = dplyr::row_number(), original_id = dplyr::row_number())
-  data <- dplyr::select(data, plot_id, {{x_var}},{{y_var}}, {{text_var}}, {{colour_var}}, original_id, ...)
+  data <- dplyr::relocate(data, plot_id, {{x_var}},{{y_var}}, {{text_var}}, {{colour_var}}, original_id)
   data <- dplyr::rename(data, text_var = 4, colour_var = 5)
 
   ui <- shiny::fluidPage(
@@ -128,13 +128,14 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
       key <- selected_range()$key
       key <- as.numeric(key)
 
-      df <- reactive_data() %>%
-        dplyr::filter(original_id %in% key) %>%
+      df_filtered <<- reactive_data() %>%
+        dplyr::filter(original_id %in% key)
+
+      df <- df_filtered %>%
         #Select the columns you want to see from your data
         dplyr::select(`ID` = original_id, `Text` = text_var,
                       `Colour Variable` = colour_var,  ...)
 
-      df_copy <<- df
       DT::datatable(df, filter = "top", options = list(pageLength = input$n,
                                                        dom = '<"top" pif>', autoWidth = FALSE),
                     style = "bootstrap", rownames = FALSE,
@@ -148,7 +149,7 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
         paste0(input$fileName, ".csv")
       },
       content = function(file) {
-        utils::write.csv(df_copy, file)
+        utils::write.csv(df_filtered, file)
       }
     )
 
@@ -165,6 +166,3 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
 
   shiny::shinyApp(ui, server)
 }
-
-
-
