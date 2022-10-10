@@ -26,7 +26,7 @@
 #'
 #' }
 umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size = 2,
-                          umap_height = 600, x_var = V1, y_var = V2, type = "scattergl"){
+                       umap_height = 600, x_var = V1, y_var = V2, type = "scattergl"){
 
   #-----
   text_sym <- rlang::ensym(text_var)
@@ -39,10 +39,9 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
   ui <- shiny::fluidPage(
     # shinythemes::themeSelector(),
     theme = shinythemes::shinytheme(theme = "superhero"),
-
     shiny::fluidRow(
-      shiny::column(2, shiny::textInput("fileName", "File Name", "mydata")),
-      shiny::column(1, shiny::div(style = "margin-top: 20px;",shiny::downloadButton("downloadData", "Download", class = "btn btn-success")))
+      shiny::column(2, shiny::textInput("remainingName", "File Name", "data_cleaned")),
+      shiny::column(1, shiny::div(style = "margin-top: 20px;",shiny::downloadButton("downloadAll", "Download All Data", class = "btn btn-success")))
     ),
     shiny::br(),
     shiny::fluidRow(
@@ -52,8 +51,10 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
     shiny::br(),
     shiny::fluidRow(
       shiny::column(2, shiny::textInput("Regex", "Pattern to filter",  value = NULL)),
-      shiny::column(2, shiny::numericInput("n", "Posts shown per page", 10, min = 1, max = 200)),
-      shiny::column(1, offset = 4, shiny::div(style = "margin-top: 20px;", shiny::actionButton("delete", "Delete selections", class = 'btn-danger')))
+      shiny::column(2, shiny::textInput("fileName", "File Name", "mydata")),
+      shiny::column(2, shiny::div(style = "margin-top: 20px;",shiny::downloadButton("downloadData", "Download Selections", class = "btn btn-success"))),
+      shiny::column(1, offset = 0, shiny::div(style = "margin-top: 20px;", shiny::actionButton("delete", "Delete selections", class = 'btn-danger'))),
+      shiny::column(2, offset = 1, shiny::numericInput("n", "Posts shown per page", 10, min = 1, max = 200))
     ),
     shiny::br(),
     shiny::fluidRow(
@@ -137,7 +138,8 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
       DT::datatable(df, filter = "top", options = list(pageLength = input$n,
                                                        dom = '<"top" pif>', autoWidth = FALSE),
                     style = "bootstrap", rownames = FALSE,
-                    caption = htmltools::tags$caption("Selected Mentions", style="color:white"))
+                    caption = htmltools::tags$caption("Selected Mentions", style="color:white"),
+                    escape = FALSE)
     })
 
 
@@ -150,9 +152,19 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
       }
     )
 
+    output$downloadAll <- shiny::downloadHandler(
+      filename = function() {
+        paste0(input$remainingName, ".csv")
+      },
+      content = function(file) {
+        utils::write.csv(reactive_data(), file)
+      }
+    )
+
   }
 
   shiny::shinyApp(ui, server)
 }
+
 
 
