@@ -2,18 +2,20 @@
 % Please edit documentation in R/save_plot_list.R
 \name{save_plot_list}
 \alias{save_plot_list}
-\title{Save a list of plots}
+\title{Save a list of plots to the current working directory}
 \usage{
-save_plot_list(plot_list, plot_type = "bigram")
+save_plot_list(plot_list, plot_type = "bigram", dpi = 700)
 }
 \arguments{
 \item{plot_list}{Should be a named list of plots}
 
 \item{plot_type}{For saving prefix that gets pasted with name and .png = e.g. "bigram_microsoft_topic_1.png"}
+
+\item{dpi}{Resolution of saved image - higher number = higher quality}
 }
 \value{
 does not return anything - saves plots to working directory
 }
 \description{
-Save a list of plots
+Set your working directory to the folder you want to save your plots to with \code{setwd("~/foo/bar")} then call the function on your list of plots.
 }
