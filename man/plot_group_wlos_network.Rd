@@ -9,6 +9,7 @@ plot_group_wlos_network(
   group_var = brand,
   text_var = message,
   n_terms = 20,
+  top_frequency_terms = 1500,
   with_ties = FALSE
 )
 }
@@ -20,6 +21,8 @@ plot_group_wlos_network(
 \item{text_var}{The text variable}
 
 \item{n_terms}{Number of terms to allow in plot}
+
+\item{top_frequency_terms}{}
 
 \item{with_ties}{Whether to allow for ties or not (possibly selecting more than \code{n_terms})}
 }

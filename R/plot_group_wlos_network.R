@@ -7,6 +7,7 @@
 #' @param text_var The text variable
 #' @param n_terms Number of terms to allow in plot
 #' @param with_ties Whether to allow for ties or not (possibly selecting more than `n_terms`)
+#' @param top_frequency_terms
 #'
 #' @return A network visualisation
 #' @export
@@ -22,7 +23,7 @@
 #'     with_ties = FALSE)
 #' }
 plot_group_wlos_network <- function(data, group_var = brand,
-                                    text_var = message, n_terms = 20, with_ties = FALSE){
+                                    text_var = message, n_terms = 20, top_frequency_terms = 1500, with_ties = FALSE){
 
   #Some tidy evaluate variables
   group_sym <- rlang::ensym(group_var)
@@ -35,6 +36,7 @@ plot_group_wlos_network <- function(data, group_var = brand,
     dplyr::count(words, sort = TRUE) %>%
     dplyr::ungroup() %>%
     tidylo::bind_log_odds(set = {{group_var}}, feature = words, n = n) %>%
+    dplyr::slice_max(order_by = n, n = top_frequency_terms) %>%
     dplyr::group_by({{group_var}}) %>%
     dplyr::slice_max(order_by = log_odds_weighted, n = n_terms) %>%
     dplyr::ungroup()
