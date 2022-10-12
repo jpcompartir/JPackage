@@ -29,6 +29,7 @@ Imports:
     purrr,
     rlang,
     shiny,
+    shinythemes,
     stats,
     stringr,
     textmineR,
