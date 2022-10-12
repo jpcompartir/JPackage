@@ -13,7 +13,8 @@ umap_shiny(
   umap_height = 600,
   x_var = V1,
   y_var = V2,
-  type = "scattergl"
+  type = "scattergl",
+  colour_mapping = NULL
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ umap_shiny(
 \item{y_var}{Variable with y axis co-ordinates}
 
 \item{type}{a string instructing what type of trace, "scattergl" can handle more points.}
+
+\item{colour_mapping}{A vector of hexcodes for colour mapping.}
 }
 \value{
 shiny app

@@ -19,7 +19,7 @@ plot_group_vol_time(
 
 \item{date_var}{Variable which contains date information (can be datetime too I think)}
 
-\item{unit}{Time unit fed into lubridate::floor_date e.g. "week", "day", "month", "second"}
+\item{unit}{Time unit fed into lubridate::floor_date e.g. "week", "day", "month", "second", "quarter", "year"}
 
 \item{nrow}{How many rows the plot should be shown in}
 }

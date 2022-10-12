@@ -9,7 +9,7 @@
 #' @param size The size of each point in the UMAP plot
 #' @param umap_height total height of UMAP plot
 #' @param type a string instructing what type of trace, "scattergl" can handle more points.
-#'
+#' @param colour_mapping A vector of hexcodes for colour mapping.
 #'
 #' @return shiny app
 #' @export
@@ -26,7 +26,7 @@
 #'
 #' }
 umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size = 2,
-                       umap_height = 600, x_var = V1, y_var = V2, type = "scattergl"){
+                          umap_height = 600, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
 
   #-----
   text_sym <- rlang::ensym(text_var)
@@ -104,7 +104,10 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
     output$umapPlot = plotly::renderPlotly({
       #cluster can be changed
       reactive_data() %>%
-        plotly::plot_ly(x = ~V1, y = ~V2, type = type, color = ~colour_var,
+        plotly::plot_ly(x = ~V1, y = ~V2,
+                        type = type,
+                        color = ~colour_var,
+                        colors = colour_mapping,
                         key = ~original_id,
                         #make sure mention_content = text variable of your data
                         text = ~paste("<br> Post:", text_var),

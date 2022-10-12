@@ -3,7 +3,7 @@
 #' @param df Data frame or tibble
 #' @param group_var grouping variable e.g. country, cluster, topic etc.
 #' @param date_var Variable which contains date information (can be datetime too I think)
-#' @param unit Time unit fed into lubridate::floor_date e.g. "week", "day", "month", "second"
+#' @param unit Time unit fed into lubridate::floor_date e.g. "week", "day", "month", "second", "quarter", "year"
 #' @param nrow How many rows the plot should be shown in
 #'
 #' @return ggplot object of facetted bar charts
