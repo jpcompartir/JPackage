@@ -28,14 +28,16 @@
 umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size = 2,
                           umap_height = 600, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
 
-  #-----
+  #----- hide wrangling ----
   text_sym <- rlang::ensym(text_var)
   colour_sym <- rlang::ensym(colour_var)
 
-  data <- dplyr::mutate(data, plot_id = dplyr::row_number(), original_id = dplyr::row_number())
-  data <- dplyr::relocate(data, plot_id, {{x_var}},{{y_var}}, {{text_var}}, {{colour_var}}, original_id)
-  data <- dplyr::rename(data, text_var = 4, colour_var = 5)
+  data <- dplyr::mutate(data, original_id = dplyr::row_number())
+  data <- dplyr::relocate(data, {{x_var}},{{y_var}}, {{text_var}}, {{colour_var}}, original_id)
+  #Rename columns to avoid relying on tidy evaluate in server logic
+  data <- dplyr::rename(data, text_var = 3, colour_var = 4)
 
+  #---- hide UI ----
   ui <- shiny::fluidPage(
     # shinythemes::themeSelector(),
     theme = shinythemes::shinytheme(theme = "superhero"),
@@ -45,8 +47,8 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
     ),
     shiny::br(),
     shiny::fluidRow(
-      shiny::column(2, shiny::sliderInput( "x1","V1 Range", -100, 100, c(-20, 20))),
-      shiny::column(2, shiny::sliderInput( "y1","V2 Range", -100, 100, c(-20, 20)))
+      shiny::column(2, shiny::sliderInput( "x1","V1 Range", step = 5, -100, 100, c(-20, 20))),
+      shiny::column(2, shiny::sliderInput( "y1","V2 Range", step = 5, -100, 100, c(-20, 20)))
     ),
     shiny::br(),
     shiny::fluidRow(
@@ -67,7 +69,7 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
     ),
   )
 
-
+  #---- hide server ----
   server <- function(input, output, session){
 
 
@@ -77,7 +79,8 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
       pattern(input$Regex)
     })
 
-    #Get the original IDs saved and save an object for later adding selected points to remove
+    #Get the original IDs saved and save an object for later adding selected points to remove,
+    #use reactiveValues rather than reactiveVal son they are stored.
     remove_range <- shiny::reactiveValues(
       keep_keys = data$original_id,
       remove_keys = NULL
@@ -91,9 +94,10 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
 
     })
 
+    #Create a reactive data frame from the original
     reactive_data <- shiny::reactive({
 
-      data <- data %>%
+      data %>%
         dplyr::filter(V1 > input$x1[[1]], V1 < input$x1[[2]], V2 > input$y1[[1]], V2 < input$y1[[2]]) %>%
         dplyr::filter(!colour_var %in% input$cluster,
                       original_id %in% remove_range$keep_keys) %>%
@@ -107,12 +111,15 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
         plotly::plot_ly(x = ~V1, y = ~V2,
                         type = type,
                         color = ~colour_var,
+                        #Allow a vector of colours to be fed in
                         colors = colour_mapping,
+                        #Keep track of IDs irrespective of colour variable's data type (otherwise you'll have problems with continuous vs character vs factor)
                         key = ~original_id,
-                        #make sure mention_content = text variable of your data
+                        #Allows for the post to appear with hover
                         text = ~paste("<br> Post:", text_var),
-                        hoverinfo = "text", marker = list(size = size), height = umap_height) %>%
-        plotly::layout(dragmode = "lasso",
+                        hoverinfo = "text", marker = list(size = size),
+                        height = umap_height) %>%
+        plotly::layout(dragmode = "lasso", #Instead of box selecting
                        legend= list(itemsizing='constant')) %>%
         plotly::event_register(event = "plotly_selected")
     })
@@ -166,6 +173,6 @@ umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size
     )
 
   }
-
+#---- hide app render ----
   shiny::shinyApp(ui, server)
 }
