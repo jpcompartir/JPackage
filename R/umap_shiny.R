@@ -25,7 +25,7 @@
 #' umap_shiny(data, text_var = mention_content, colour_var = entity, x_var = x, y_var = y)
 #'
 #' }
-umap_shiny <- function(data,..., text_var = message, colour_var = cluster,  size = 2,
+umap_shiny <- function(data,..., text_var, colour_var,  size = 2,
                           umap_height = 600, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
 
   #----- hide wrangling ----

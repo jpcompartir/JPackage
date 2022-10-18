@@ -7,8 +7,8 @@
 umap_shiny(
   data,
   ...,
-  text_var = message,
-  colour_var = cluster,
+  text_var,
+  colour_var,
   size = 2,
   umap_height = 600,
   x_var = V1,
