@@ -26,6 +26,23 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
   plotting_heights <- "450px"
   plotting_widths <- "400px"
 
+  #Store another version of the HelpR function so that we can set the fill with a text input
+  .plot_tokens_counter <- function(df, text_var = .data$mention_content, top_n = 20, fill = "#0f50d2"){
+
+    .text_var <- rlang::enquo(text_var)
+
+    df %>%
+      tidytext::unnest_tokens(words, rlang::quo_name(.text_var))%>%
+      dplyr::count(words, sort = TRUE) %>%
+      dplyr::top_n(top_n)%>%
+      ggplot2::ggplot(ggplot2::aes(x = reorder(words, n), y = n))+
+      ggplot2::geom_col(fill = fill)+
+      ggplot2::coord_flip()+
+      ggplot2::theme_bw()+
+      ggplot2::labs(x = NULL, y =  "Word Count", title = "Bar Chart of Most Frequent Words")+
+      ggplot2::theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+  }
+
   #----- hide wrangling ----
   text_sym <- rlang::ensym(text_var)
   colour_sym <- rlang::ensym(colour_var)
@@ -150,7 +167,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                         shiny::sidebarPanel(width = 2,
                                                             shiny::sliderInput("tokenHeight","height",  min = 100, max = 800, value = 400, step = 50),
                                                             shiny::sliderInput("tokenWidth","width",  min = 100, max = 800, value = 400, step = 50),
-                                                            shiny::textInput("tokenHex", "colour", value ="#0f50d2"),
+                                                            shiny::textInput("tokenHex", "colour", value = "#0f50d2"),
                                                             shiny::textInput(inputId = "tokenTitle", label = "Title",
                                                                              placeholder = "Write title here...", value = ""),
                                                             shiny::textInput(inputId = "tokenSubtitle", label = "Subtitle",
@@ -343,7 +360,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$tokenPlot <- renderPlot({
         df_filtered %>%
-          HelpR::plot_tokens_counter(text_var = {{cleaned_text_var}}, top_n = 25) +
+          .plot_tokens_counter(text_var = {{cleaned_text_var}}, top_n = 25, fill = delayedTokenHex()) +
           ggplot2::labs(title = paste0(input$tokenTitle),
                         caption = paste0(input$tokenCaption),
                         subtitle = paste0(input$tokenSubtitle),
@@ -412,9 +429,14 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       req(plotly::event_data("plotly_selected"))
       if(length(selected_range())> 1 ){
         df_filtered %>%
-          HelpR::plot_tokens_counter(text_var = {{cleaned_text_var}}, top_n = 25)
+          .plot_tokens_counter(text_var = {{cleaned_text_var}}, top_n = 25, fill = delayedTokenHex())
       }
     }, res = 100)
+
+    delayedTokenHex <- shiny::reactive({
+      input$tokenHex
+    }) %>%
+      shiny::debounce(1000)
 
     output$bigramPlot <- renderPlot({
       req(plotly::event_data("plotly_selected"))
