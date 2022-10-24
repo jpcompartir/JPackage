@@ -2,8 +2,8 @@
 #'
 #' Multiple tabs - one for cleaning and selecting, others for summary plots.
 #'
-#' @param data
-#' @param ...
+#' @param data Data Frame
+#' @param ... Additional Columns to select
 #' @param id Your ID column, if there is not one in your data, create one
 #' @param text_var The original text variable for display in the data table
 #' @param colour_var The variable you wish to map colour to (should be a string or factor)
@@ -22,15 +22,31 @@
 #'
 #' @examples
 conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_text_var, date_var, sentiment_var,
-                           size = 2, umap_height = 600, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
-  plotting_heights <- "450px"
-  plotting_widths <- "400px"
+                                   size = 2, umap_height = 600, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
 
-  #Store another version of the HelpR function so that we can set the fill with a text input
+  #Modified version of vol plot
+  .plot_volume_over_time <- function(df, date_var , unit = "week",  fill = "#0f50d2"){
+
+    date_sym <- rlang::ensym(date_var)
+
+    df <- df %>% dplyr::mutate(plot_date = lubridate::floor_date(!!date_sym, unit = unit))
+
+    df %>%
+      dplyr::count(plot_date) %>%
+      ggplot2::ggplot(ggplot2::aes(x = plot_date, y = n)) +
+      ggplot2::geom_col(fill = fill) +
+      ggplot2::theme_minimal() +
+      ggplot2::scale_x_date(date_breaks = "1 months", date_labels = "%d-%b") +
+      ggplot2::theme(legend.position = "none",
+                     axis.text.x = element_text(angle = 90))
+
+
+  }
+
+  #Modified version of token plots
   .plot_tokens_counter <- function(df, text_var = .data$mention_content, top_n = 20, fill = "#0f50d2"){
 
     .text_var <- rlang::enquo(text_var)
-
     df %>%
       tidytext::unnest_tokens(words, rlang::quo_name(.text_var))%>%
       dplyr::count(words, sort = TRUE) %>%
@@ -43,6 +59,9 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       ggplot2::theme(plot.title = element_text(hjust = 0.5, face = "bold"))
   }
 
+  plotting_heights <- "450px"
+  plotting_widths <- "400px"
+
   #----- hide wrangling ----
   text_sym <- rlang::ensym(text_var)
   colour_sym <- rlang::ensym(colour_var)
@@ -50,6 +69,11 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
   sentiment_sym <- rlang::ensym(sentiment_var)
   cleaned_text_sym <- rlang::ensym(cleaned_text_var)
   # id_sym <- rlang::ensym(id_var)
+
+  #Get date ranges for volume
+  dates <- data %>% select(!!date_sym) %>% summarise(min = min(!!date_sym), max = max(!!date_sym))
+  date_min <- as.Date(dates$min)
+  date_max <- as.Date(dates$max)
 
   data <- dplyr::rename(data, id_var = {{id}})
   data <- dplyr::relocate(data, {{x_var}},{{y_var}}, {{text_var}}, {{colour_var}}, id_var)
@@ -60,8 +84,8 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
   ui <-
     shiny::navbarPage("Conversation Landscape", theme = shinythemes::shinytheme("cosmo"), position = "fixed-top",
                       shiny::tabPanel("Survey the Landscape",
-                                      #---- Tab 1 ----
-                                      shiny::br(),
+                                      #---- Landscape Tab----
+                                      shiny::hr(),
                                       shiny::fluidPage(
                                         # shinythemes::themeSelector(),
                                         theme = shinythemes::shinytheme(theme = "superhero"),
@@ -89,27 +113,24 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                         ),
                                         shiny::br(),
                                         shiny::fluidRow(
-                                          shiny::column(7,
-                                                        plotly::plotlyOutput("umapPlot")
-                                          ),
-                                          shiny::column(5,
-                                                        DT::dataTableOutput("highlightedTable")
-                                          ),
+                                          shiny::column(7, shinycssloaders::withSpinner(plotly::plotlyOutput("umapPlot"))),
+                                          shiny::column(5, shinycssloaders::withSpinner(DT::dataTableOutput("highlightedTable"))),
                                         ),
                                       ),),
-                      #---- tab 2 ----
+                      #---- Distribution Tab ----
                       shiny::br(),
-                      shiny::tabPanel("Summarise the Landscape", shiny::fluidPage(theme = shinythemes::shinytheme('superhero')),
+                      shiny::tabPanel("Distribution Plots", shiny::fluidPage(theme = shinythemes::shinytheme('superhero')),
                                       shiny::br(),
                                       shiny::p("In this tab you can view, and download if necessary, charts designed to help you understand your selections."),
                                       shiny::p("Below you will find four charts; sentiment distribution, volume over time, tokens counter and a sampled bigram network."),
                                       #---- Sentiment plot ----
                                       shiny::br(),
-                                      shiny::titlePanel(title =  "Sentiment Plot"),
+                                      shiny::titlePanel(title =  "Sentiment Distribution"),
                                       shiny::sidebarLayout(
                                         shiny::sidebarPanel(width = 2,
-                                                            shiny::sliderInput("sentimentHeight","height",  min = 100, max = 800, value = 400, step = 50),
-                                                            shiny::sliderInput("sentimentWidth","width",  min = 100, max = 800, value = 400, step = 50),
+                                                            #Should functionise all of this and use map to render the UI elements.
+                                                            shiny::sliderInput("sentimentHeight","Height",  min = 100, max = 800, value = 400, step = 50),
+                                                            shiny::sliderInput("sentimentWidth","Width",  min = 100, max = 800, value = 400, step = 50),
                                                             shiny::textInput(inputId = "sentimentTitle", label = "Title",
                                                                              placeholder = "Write title here...", value = ""),
                                                             shiny::textInput(inputId = "sentimentSubtitle", label = "Subtitle",
@@ -125,20 +146,24 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                                   </button>'),
                                         ),
                                         shiny::mainPanel(
-                                          shiny::plotOutput("sentimentPlot",
-                                                            height = plotting_heights,
-                                                            width  = plotting_widths)
+                                          shinycssloaders::withSpinner(shiny::plotOutput("sentimentPlot",height = plotting_heights, width  = plotting_widths))
                                         )
                                       ),
-                                      shiny::br(),
+                                      shiny::hr(),
 
                                       #Volume Over Time plot ----
+
+                                      shiny::titlePanel(title = "Volume Over Time"),
                                       shiny::br(),
-                                      shiny::titlePanel(title = "Volume Plot"),
                                       shiny::sidebarLayout(
                                         shiny::sidebarPanel(width =  2,
-                                                            shiny::sliderInput("volumeHeight","height",  min = 100, max = 800, value = 400, step = 50),
-                                                            shiny::sliderInput("volumeWidth","width",  min = 100, max = 800, value = 400, step = 50),
+                                                            shiny::sliderInput("volumeHeight","Height",  min = 100, max = 800, value = 400, step = 50),
+                                                            shiny::sliderInput("volumeWidth","Width",  min = 100, max = 800, value = 400, step = 50),
+                                                            shiny::dateRangeInput("dateRange", label = "Date Range",start = date_min, end = date_max),
+
+                                                            shiny::selectInput(inputId = "dateBreak", label = "Unit", choices = c("day", "week", "month", "quarter", "year"), selected = "week"),
+                                                            shiny::selectInput(inputId = "dateSmooth", label = "Smooth", choices = c("none", "loess", "lm", "glm", "gam"), selected = "none"),
+                                                            shiny::uiOutput("smoothControls"),
                                                             shiny::textInput("volumeHex", "colour", value ="#107C10"),
                                                             shiny::textInput(inputId = "volumeTitle", label = "Title",
                                                                              placeholder = "Write title here...", value = ""),
@@ -154,20 +179,19 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                                   <div class="arrow"></div>
                                                                   </button>'),
                                         ),
-                                        shiny::mainPanel(shiny::plotOutput("volumePlot",
-                                                                           height = plotting_heights,
-                                                                           width  = plotting_widths))
+                                        shiny::mainPanel(
+                                          shinycssloaders::withSpinner(shiny::plotOutput("volumePlot", height = plotting_heights,width  = plotting_widths)))
                                       ),
                                       shiny::br(),
 
                                       #Token Plot ----
                                       shiny::br(),
-                                      shiny::titlePanel(title = "Token Plot"),
+                                      shiny::titlePanel(title = "Token Distribution"),
                                       shiny::sidebarLayout(
                                         shiny::sidebarPanel(width = 2,
-                                                            shiny::sliderInput("tokenHeight","height",  min = 100, max = 800, value = 400, step = 50),
-                                                            shiny::sliderInput("tokenWidth","width",  min = 100, max = 800, value = 400, step = 50),
-                                                            shiny::textInput("tokenHex", "colour", value = "#0f50d2"),
+                                                            shiny::sliderInput("tokenHeight","Height",  min = 100, max = 800, value = 400, step = 50),
+                                                            shiny::sliderInput("tokenWidth","Width",  min = 100, max = 800, value = 400, step = 50),
+                                                            shiny::textInput("tokenHex", "colour", value ="#0f50d2"),
                                                             shiny::textInput(inputId = "tokenTitle", label = "Title",
                                                                              placeholder = "Write title here...", value = ""),
                                                             shiny::textInput(inputId = "tokenSubtitle", label = "Subtitle",
@@ -182,47 +206,31 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                                   <div class="arrow"></div>
                                                                   </button>'),
                                         ),
-                                        shiny::mainPanel(shiny::plotOutput("tokenPlot",
-                                                                           height = plotting_heights,
-                                                                           width  = plotting_widths))
+                                        shiny::mainPanel(
+                                          shinycssloaders::withSpinner(shiny::plotOutput("tokenPlot", height = plotting_heights, width  = plotting_widths)))
                                       ),
+                      ),
+                      shiny::br(),
+                      #---- Bigram Tab ----
+                      shiny::tabPanel("Bigram Network", shiny::fluidPage(theme = shinythemes::shinytheme('superhero')),
                                       shiny::br(),
                                       # Bigram plot ----
-                                      shiny::p("Below you'll find a bigram network, this network will help you estimate how clean your selected data is."),
-                                      shiny::p("Remember that long and connected chains of words may represent spam or unwanted mentions."),
-                                      shiny::p("This bigram network is restricted to a maximum of 5,000 data points for speed and user experience."),
-                                      shiny::p("It is therefore not recommended to be saved or exported. If the data looks clean download the selection"),
-                                      shiny::p("and create the network in the standard way in R/Rstudio"),
-                                      #Need to figure out how to customise helpText before relying on it.
-                                      # shiny::helpText("Below you'll find a bigram network, this network will help you estimate how clean your selected data is.",
-                                      #                 "Remember that long and connected chains of words may represent spam or unwanted mentions.",
-                                      #                 "NOTE: his bigram network is restricted to a maximum of 5,000 data points for speed and user experience.",
-                                      #                 "It is therefore not recommended to be saved or exported. If the data looks clean download the selection",
-                                      #                 "and create the network in the standard way in R/Rstudio"
-                                      #                 , width = 3),
+
+                                      shiny::fluidRow(
+                                        shiny::column(4,
+                                                      shiny::p("Below you'll find a bigram network, this network will help you estimate how clean your selected data is. Remember that long and connected chains of words may represent spam or unwanted mentions."),
+                                                      shiny::br() ,
+                                                      shiny::p("This bigram network is restricted to a maximum of 5,000 data points for speed and user experience. It is therefore not recommended to be saved or exported. If the data looks clean, download the selection and create the network in the standard way in R/Rstudio"),)
+                                      ),
 
                                       shiny::sidebarPanel(width = 2,
-                                                          shiny::sliderInput("bigramHeight","height",  min = 100, max = 1200, value = 600, step = 50),
-                                                          shiny::sliderInput("bigramWidth","width",  min = 100, max = 1200, value = 800, step = 50),
+                                                          shiny::sliderInput("bigramHeight","Height",  min = 100, max = 1200, value = 600, step = 50),
+                                                          shiny::sliderInput("bigramWidth","Width",  min = 100, max = 1200, value = 800, step = 50),
                                       ),
-                                      shiny::mainPanel(shiny::plotOutput("bigramPlot",
-                                                                         height = plotting_heights,
-                                                                         width  = plotting_widths))),
-                      shiny::br(),
+                                      shiny::mainPanel(
+                                        shinycssloaders::withSpinner(shiny::plotOutput("bigramPlot",height = plotting_heights,width  = plotting_widths)))
+                      ),
 
-
-                      #Old UI Commenting out TODO
-                      # shiny::fluidRow(
-                      #   shiny::column(4,shiny::plotOutput("volumePlot", height = "400px")),
-                      #   shiny::column(3,shiny::plotOutput("sentimentPlot", height = "400px")),
-                      #   shiny::column(4,shiny::plotOutput("tokenPlot", height = "400px"))
-                      # ),
-                      # shiny::br(),
-                      # shiny::p("Below you'll find a bigram network, this network will help you estimate how clean your selected data is."),
-                      # shiny::p("Remember that long and connected chains of words may represent spam or unwanted mentions."),
-                      # shiny::fluidRow(
-                      #   shiny::column(8, shiny::plotOutput("bigramPlot", height = "600px"))
-                      # ),
     )
 
 
@@ -340,7 +348,12 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       }
     )
 
-    #--- Reactive plots ----
+    delayedTokenHex <- shiny::reactive({
+      input$tokenHex
+    }) %>%
+      shiny::debounce(1000)
+
+    #--- Reactive plots  Observes ----
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$sentimentPlot <- renderPlot({
         df_filtered %>%
@@ -356,7 +369,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       width = function() input$sentimentWidth,
       height = function() input$sentimentHeight)
     })
-
+    #---- Token plot ----
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$tokenPlot <- renderPlot({
         df_filtered %>%
@@ -372,20 +385,52 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       height = function() input$tokenHeight)
     })
 
+    #---- Volume Plot ----
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$volumePlot <- renderPlot({
-        df_filtered %>%
-          HelpR::plot_volume_over_time(time =  "week", my_fill = input$volumeHex) +
+
+        vol_data <- data %>%
+          dplyr::filter(date >= input$dateRange[[1]], date <= input$dateRange[[2]])
+
+        vol_plot <- vol_data %>%
+          .plot_volume_over_time(date = date, unit =  input$dateBreak, fill = input$volumeHex) +
           ggplot2::labs(title = paste0(input$volumeTitle),
                         caption = paste0(input$volumeCaption),
                         subtitle = paste0(input$volumeSubtitle),
                         x = paste0(input$volumeXlabel),
                         y = paste0(input$volumeYlabel))
+
+        if(!input$dateSmooth == "none"){
+          if(input$smoothSe == "FALSE"){
+            vol_plot <- vol_plot +
+              ggplot2::geom_smooth(method = input$dateSmooth, se = FALSE, colour = input$smoothColour)
+          }else {
+            vol_plot <- vol_plot+
+              ggplot2::geom_smooth(method = input$dateSmooth, colour = input$smoothColour)
+          }
+        }
+
+
+        return(vol_plot)
+
+
       }, res = 100,
       width = function() input$volumeWidth,
       height = function() input$volumeHeight)
     })
 
+    #geom_smooth controls
+    output$smoothControls <- renderUI({
+      if(input$dateSmooth != "none"){
+        tagList(
+          selectInput("smoothSe", "show standard error?", choices = c("TRUE", "FALSE"), selected = "TRUE"),
+          textInput("smoothColour", "Smooth colour", value ="#000000")
+        )
+      }
+
+    })
+
+    #---- Bigram Plot ----
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$bigramPlot <- renderPlot({
 
@@ -405,57 +450,8 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       width = function() input$bigramWidth,
       height = function() input$bigramHeight)
     })
-
-    output$volumePlot <- renderPlot({
-      req(plotly::event_data("plotly_selected"))
-      if(length(selected_range()) > 1 ){
-        df_filtered %>%
-          HelpR::plot_volume_over_time(time =  "week", my_fill = "#107C10")
-      }
-    },res = 100)
-
-    output$sentimentPlot <- renderPlot({
-      req(plotly::event_data("plotly_selected"))
-      if(length(selected_range()) > 1 ){
-        df_filtered %>%
-          HelpR::plot_sentiment_distribution() +
-          HelpR::theme_microsoft_discrete() +
-          ggplot2::theme(legend.position = "none")
-      }
-
-    }, res = 100)
-
-    output$tokenPlot <- renderPlot({
-      req(plotly::event_data("plotly_selected"))
-      if(length(selected_range())> 1 ){
-        df_filtered %>%
-          .plot_tokens_counter(text_var = {{cleaned_text_var}}, top_n = 25, fill = delayedTokenHex())
-      }
-    }, res = 100)
-
-    delayedTokenHex <- shiny::reactive({
-      input$tokenHex
-    }) %>%
-      shiny::debounce(1000)
-
-    output$bigramPlot <- renderPlot({
-      req(plotly::event_data("plotly_selected"))
-      if(length(selected_range()) > 1){
-        if(!length(selected_range()) >= 5000){
-          bigram <- df_filtered %>%
-            JPackage::make_bigram_viz(text_var = {{cleaned_text_var}}, clean_text = FALSE, min = 5)
-        }else{
-          bigram <- df_filtered %>%
-            dplyr::sample_n(5000) %>%
-            JPackage::make_bigram_viz(text_var = {{cleaned_text_var}}, clean_text = FALSE, min = 5)
-        }
-      }
-      bigram
-
-
-    }, res = 100)
-
   }
+
   #---- hide app render ----
   shiny::shinyApp(ui, server)
 }
