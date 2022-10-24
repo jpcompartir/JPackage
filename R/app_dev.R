@@ -131,16 +131,8 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                             #Should functionise all of this and use map to render the UI elements.
                                                             shiny::sliderInput("sentimentHeight","Height",  min = 100, max = 800, value = 400, step = 50),
                                                             shiny::sliderInput("sentimentWidth","Width",  min = 100, max = 800, value = 400, step = 50),
-                                                            shiny::textInput(inputId = "sentimentTitle", label = "Title",
-                                                                             placeholder = "Write title here...", value = ""),
-                                                            shiny::textInput(inputId = "sentimentSubtitle", label = "Subtitle",
-                                                                             placeholder = "Write subtitle here...", value = ""),
-                                                            shiny::textInput(inputId = "sentimentCaption", label = "Caption",
-                                                                             placeholder = "Write caption here...", value = ""),
-                                                            shiny::textInput(inputId = "sentimentXlabel", label = "X axis title",
-                                                                             placeholder = "Write the x axis title here..."),
-                                                            shiny::textInput(inputId = "sentimentYlabel", label = "Y axis title",
-                                                                             placeholder = "Write the y axis title here"),
+                                                            shiny::selectInput(inputId = "toggleSentimenttitles", label = "Customise Titles?", choices = c("TRUE", "FALSE"), selected = "FALSE"),
+                                                            shiny::uiOutput("sentimentTitles"),
                                                             shiny::downloadButton(outputId = "saveSentiment", class = '<button class="btn-download" id="btn-auto-click">
                                                                   <div class="arrow"></div>
                                                                   </button>'),
@@ -152,7 +144,6 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                       shiny::hr(),
 
                                       #Volume Over Time plot ----
-
                                       shiny::titlePanel(title = "Volume Over Time"),
                                       shiny::br(),
                                       shiny::sidebarLayout(
@@ -165,16 +156,8 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                             shiny::selectInput(inputId = "dateSmooth", label = "Smooth", choices = c("none", "loess", "lm", "glm", "gam"), selected = "none"),
                                                             shiny::uiOutput("smoothControls"),
                                                             shiny::textInput("volumeHex", "colour", value ="#107C10"),
-                                                            shiny::textInput(inputId = "volumeTitle", label = "Title",
-                                                                             placeholder = "Write title here...", value = ""),
-                                                            shiny::textInput(inputId = "volumeSubtitle", label = "Subtitle",
-                                                                             placeholder = "Write subtitle here...", value = ""),
-                                                            shiny::textInput(inputId = "volumeCaption", label = "Caption",
-                                                                             placeholder = "Write caption here...", value = ""),
-                                                            shiny::textInput(inputId = "volumeXlabel", label = "X axis title",
-                                                                             placeholder = "Write the x axis title here..."),
-                                                            shiny::textInput(inputId = "volumeYlabel", label = "Y axis title",
-                                                                             placeholder = "Write the y axis title here"),
+                                                            shiny::selectInput(inputId = "toggleVolumetitles", label = "Customise Titles?", choices = c("TRUE", "FALSE"), selected = "FALSE"),
+                                                            shiny::uiOutput("volumeTitles"),
                                                             shiny::downloadButton(outputId = "saveVolume", class = '<button class="btn-download" id="btn-auto-click">
                                                                   <div class="arrow"></div>
                                                                   </button>'),
@@ -191,17 +174,9 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                         shiny::sidebarPanel(width = 2,
                                                             shiny::sliderInput("tokenHeight","Height",  min = 100, max = 800, value = 400, step = 50),
                                                             shiny::sliderInput("tokenWidth","Width",  min = 100, max = 800, value = 400, step = 50),
+                                                            shiny::selectInput(inputId = "toggleTokentitles", label = "Customise Titles?", choices = c("TRUE", "FALSE"), selected = "FALSE"),
                                                             shiny::textInput("tokenHex", "colour", value ="#0f50d2"),
-                                                            shiny::textInput(inputId = "tokenTitle", label = "Title",
-                                                                             placeholder = "Write title here...", value = ""),
-                                                            shiny::textInput(inputId = "tokenSubtitle", label = "Subtitle",
-                                                                             placeholder = "Write subtitle here...", value = ""),
-                                                            shiny::textInput(inputId = "tokenCaption", label = "Caption",
-                                                                             placeholder = "Write caption here...", value = ""),
-                                                            shiny::textInput(inputId = "tokenXlabel", label = "X axis title",
-                                                                             placeholder = "Write the x axis title here..."),
-                                                            shiny::textInput(inputId = "tokenYlabel", label = "Y axis title",
-                                                                             placeholder = "Write the y axis title here"),
+                                                            shiny::uiOutput("tokenTitles"),
                                                             shiny::downloadButton(outputId = "saveToken", class = '<button class="btn-download" id="btn-auto-click">
                                                                   <div class="arrow"></div>
                                                                   </button>'),
@@ -268,7 +243,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       remove_range$keep_keys <- remove_range$keep_keys[!remove_range$keep_keys %in% remove_range$remove_keys]
 
     })
-
+    #---- reactive data ---
     reactive_data <- shiny::reactive({
 
       data <- data %>%
@@ -328,7 +303,6 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                     escape = FALSE)
     })
 
-
     #--- Download Handler Data ----
     output$downloadData <- shiny::downloadHandler(
       filename = function() {
@@ -351,9 +325,9 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
     delayedTokenHex <- shiny::reactive({
       input$tokenHex
     }) %>%
-      shiny::debounce(1000)
+      shiny::debounce(2000)
 
-    #--- Reactive plots  Observes ----
+    #--- Reactive plots + Observes ----
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$sentimentPlot <- renderPlot({
         df_filtered %>%
@@ -384,7 +358,6 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       width = function() input$tokenWidth,
       height = function() input$tokenHeight)
     })
-
     #---- Volume Plot ----
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$volumePlot <- renderPlot({
@@ -419,7 +392,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       height = function() input$volumeHeight)
     })
 
-    #geom_smooth controls
+    #Render UI plot controls ----
     output$smoothControls <- renderUI({
       if(input$dateSmooth != "none"){
         tagList(
@@ -428,6 +401,58 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
         )
       }
 
+    })
+
+    output$volumeTitles <- renderUI({
+      if(input$toggleVolumetitles == "TRUE"){
+        tagList(
+          shiny::textInput(inputId = "volumeTitle", label = "Title",
+                           placeholder = "Write title here...", value = ""),
+          shiny::textInput(inputId = "volumeSubtitle", label = "Subtitle",
+                           placeholder = "Write subtitle here...", value = ""),
+          shiny::textInput(inputId = "volumeCaption", label = "Caption",
+                           placeholder = "Write caption here...", value = ""),
+          shiny::textInput(inputId = "volumeXlabel", label = "X axis title",
+                           placeholder = "Write the x axis title here..."),
+          shiny::textInput(inputId = "volumeYlabel", label = "Y axis title",
+                           placeholder = "Write the y axis title here")
+        )
+      }
+    })
+
+    output$sentimentTitles <- renderUI({
+      if(input$toggleSentimenttitles == "TRUE"){
+        tagList(
+          shiny::textInput(inputId = "sentimentTitle", label = "Title",
+                           placeholder = "Write title here...", value = ""),
+          shiny::textInput(inputId = "sentimentSubtitle", label = "Subtitle",
+                           placeholder = "Write subtitle here...", value = ""),
+          shiny::textInput(inputId = "sentimentCaption", label = "Caption",
+                           placeholder = "Write caption here...", value = ""),
+          shiny::textInput(inputId = "sentimentXlabel", label = "X axis title",
+                           placeholder = "Write the x axis title here..."),
+          shiny::textInput(inputId = "sentimentYlabel", label = "Y axis title",
+                           placeholder = "Write the y axis title here"),
+        )
+
+      }
+    })
+    output$tokenTitles <- renderUI({
+      if(input$toggleTokentitles == "TRUE"){
+        tagList(
+          shiny::textInput(inputId = "tokenTitle", label = "Title",
+                           placeholder = "Write title here...", value = ""),
+          shiny::textInput(inputId = "tokenSubtitle", label = "Subtitle",
+                           placeholder = "Write subtitle here...", value = ""),
+          shiny::textInput(inputId = "tokenCaption", label = "Caption",
+                           placeholder = "Write caption here...", value = ""),
+          shiny::textInput(inputId = "tokenXlabel", label = "X axis title",
+                           placeholder = "Write the x axis title here..."),
+          shiny::textInput(inputId = "tokenYlabel", label = "Y axis title",
+                           placeholder = "Write the y axis title here"),
+        )
+
+      }
     })
 
     #---- Bigram Plot ----
@@ -450,8 +475,22 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       width = function() input$bigramWidth,
       height = function() input$bigramHeight)
     })
+    #---- Download boxes for plots ----
+    download_box <- function(exportname, plot) {
+      downloadHandler(
+        filename = function() {
+          paste(exportname, Sys.Date(), ".png", sep = "")
+        },
+        content = function(file) {
+          ggsave(file, plot = plot, device = "png", width = 8)
+        }
+      )
+    }
+    output$saveVolume <- download_box("volume_plot", volume_reactive())
+    output$saveToken <- download_box("token_plot", token_reactive())
+    output$saveSentiment <- download_box("sentiment_plot", sentiment_reactive())
   }
-
   #---- hide app render ----
   shiny::shinyApp(ui, server)
 }
+

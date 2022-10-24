@@ -22,6 +22,10 @@ conversation_landscape(
 )
 }
 \arguments{
+\item{data}{Data Frame}
+
+\item{...}{Additional Columns to select}
+
 \item{id}{Your ID column, if there is not one in your data, create one}
 
 \item{text_var}{The original text variable for display in the data table}
