@@ -39,8 +39,6 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       ggplot2::scale_x_date(date_breaks = "1 months", date_labels = "%d-%b") +
       ggplot2::theme(legend.position = "none",
                      axis.text.x = element_text(angle = 90))
-
-
   }
 
   #Modified version of token plots
@@ -270,9 +268,8 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
         plotly::event_register(event = "plotly_selected")
     })
 
-    #Instantiate a reactive value, then update that value dynamically when points are selected.
+    #Instantiate a reactive value, then update that value dynamically when points are selected
     selected_range <- shiny::reactiveVal({})
-
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       selected_range(plotly::event_data("plotly_selected"))
     })
@@ -328,66 +325,77 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       shiny::debounce(2000)
 
     #--- Reactive plots + Observes ----
+
+    sentiment_reactive <- reactive({
+      reactive_data() %>%
+        HelpR::plot_sentiment_distribution(sentiment_var = {{sentiment_var}}) +
+        HelpR::theme_microsoft_discrete() +
+        ggplot2::theme(legend.position = "none") +
+        ggplot2::labs(title = paste0(input$sentimentTitle),
+                      caption = paste0(input$sentimentCaption),
+                      subtitle = paste0(input$sentimentSubtitle),
+                      x = paste0(input$sentimentXlabel),
+                      y = paste0(input$sentimentYlabel))
+    })
+
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$sentimentPlot <- renderPlot({
-        df_filtered %>%
-          HelpR::plot_sentiment_distribution(sentiment_var = {{sentiment_var}}) +
-          HelpR::theme_microsoft_discrete() +
-          ggplot2::theme(legend.position = "none") +
-          ggplot2::labs(title = paste0(input$sentimentTitle),
-                        caption = paste0(input$sentimentCaption),
-                        subtitle = paste0(input$sentimentSubtitle),
-                        x = paste0(input$sentimentXlabel),
-                        y = paste0(input$sentimentYlabel))
+        sentiment_reactive()
       }, res = 100,
       width = function() input$sentimentWidth,
       height = function() input$sentimentHeight)
     })
+
     #---- Token plot ----
+    token_reactive <- reactive({
+      reactive_data() %>%
+        .plot_tokens_counter(text_var = {{cleaned_text_var}}, top_n = 25, fill = delayedTokenHex()) +
+        ggplot2::labs(title = paste0(input$tokenTitle),
+                      caption = paste0(input$tokenCaption),
+                      subtitle = paste0(input$tokenSubtitle),
+                      x = paste0(input$tokenXlabel),
+                      y = paste0(input$tokenYlabel)) +
+        ggplot2::scale_fill_manual(values = input$tokenHex)
+    })
+
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$tokenPlot <- renderPlot({
-        df_filtered %>%
-          .plot_tokens_counter(text_var = {{cleaned_text_var}}, top_n = 25, fill = delayedTokenHex()) +
-          ggplot2::labs(title = paste0(input$tokenTitle),
-                        caption = paste0(input$tokenCaption),
-                        subtitle = paste0(input$tokenSubtitle),
-                        x = paste0(input$tokenXlabel),
-                        y = paste0(input$tokenYlabel)) +
-          ggplot2::scale_fill_manual(values = input$tokenHex)
+        token_reactive()
       }, res = 100,
       width = function() input$tokenWidth,
       height = function() input$tokenHeight)
     })
+
     #---- Volume Plot ----
+    volume_reactive <- reactive({
+      vol_data <- reactive_data() %>%
+        dplyr::filter(date >= input$dateRange[[1]], date <= input$dateRange[[2]])
+
+      vol_plot <- vol_data %>%
+        .plot_volume_over_time(date = date, unit =  input$dateBreak, fill = input$volumeHex) +
+        ggplot2::labs(title = paste0(input$volumeTitle),
+                      caption = paste0(input$volumeCaption),
+                      subtitle = paste0(input$volumeSubtitle),
+                      x = paste0(input$volumeXlabel),
+                      y = paste0(input$volumeYlabel))
+
+      if(!input$dateSmooth == "none"){
+        if(input$smoothSe == "FALSE"){
+          vol_plot <- vol_plot +
+            ggplot2::geom_smooth(method = input$dateSmooth, se = FALSE, colour = input$smoothColour)
+        }else {
+          vol_plot <- vol_plot+
+            ggplot2::geom_smooth(method = input$dateSmooth, colour = input$smoothColour)
+        }
+      }
+
+      return(vol_plot)
+    })
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$volumePlot <- renderPlot({
-
-        vol_data <- data %>%
-          dplyr::filter(date >= input$dateRange[[1]], date <= input$dateRange[[2]])
-
-        vol_plot <- vol_data %>%
-          .plot_volume_over_time(date = date, unit =  input$dateBreak, fill = input$volumeHex) +
-          ggplot2::labs(title = paste0(input$volumeTitle),
-                        caption = paste0(input$volumeCaption),
-                        subtitle = paste0(input$volumeSubtitle),
-                        x = paste0(input$volumeXlabel),
-                        y = paste0(input$volumeYlabel))
-
-        if(!input$dateSmooth == "none"){
-          if(input$smoothSe == "FALSE"){
-            vol_plot <- vol_plot +
-              ggplot2::geom_smooth(method = input$dateSmooth, se = FALSE, colour = input$smoothColour)
-          }else {
-            vol_plot <- vol_plot+
-              ggplot2::geom_smooth(method = input$dateSmooth, colour = input$smoothColour)
-          }
-        }
-
-
-        return(vol_plot)
-
-
-      }, res = 100,
+        volume_reactive()
+      },
+      res = 100,
       width = function() input$volumeWidth,
       height = function() input$volumeHeight)
     })
@@ -419,7 +427,6 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
         )
       }
     })
-
     output$sentimentTitles <- renderUI({
       if(input$toggleSentimenttitles == "TRUE"){
         tagList(
@@ -461,10 +468,10 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
 
         if(length(selected_range()) > 1){
           if(!length(selected_range()) >= 5000){
-            bigram <- df_filtered %>%
+            bigram <- reactive_data() %>%
               JPackage::make_bigram_viz(text_var = {{cleaned_text_var}}, clean_text = FALSE, min = 5)
           }else{
-            bigram <- df_filtered %>%
+            bigram <- reactive_data() %>%
               dplyr::sample_n(5000) %>%
               JPackage::make_bigram_viz(text_var = {{cleaned_text_var}}, clean_text = FALSE, min = 5)
           }
@@ -475,22 +482,23 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       width = function() input$bigramWidth,
       height = function() input$bigramHeight)
     })
+
     #---- Download boxes for plots ----
-    download_box <- function(exportname, plot) {
+    download_box <- function(exportname, plot, width, height){
       downloadHandler(
         filename = function() {
           paste(exportname, Sys.Date(), ".png", sep = "")
         },
         content = function(file) {
-          ggsave(file, plot = plot, device = "png", width = 8)
+          ggsave(file, plot = plot, device = "png", width = width, height = height, unit = "mm", bg = "white", dpi = 400)
         }
       )
     }
-    output$saveVolume <- download_box("volume_plot", volume_reactive())
-    output$saveToken <- download_box("token_plot", token_reactive())
-    output$saveSentiment <- download_box("sentiment_plot", sentiment_reactive())
+    output$saveVolume <- download_box("volume_plot", volume_reactive(),height = input$volumeHeight, width = input$volumeWidth)
+    output$saveToken <- download_box("token_plot", token_reactive(), height = input$tokenHeight, width = input$tokenWidth)
+    output$saveSentiment <- download_box("sentiment_plot", sentiment_reactive(), height = input$sentimentHeight, width = input$sentimentWidth)
+
   }
   #---- hide app render ----
   shiny::shinyApp(ui, server)
 }
-
