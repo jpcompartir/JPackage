@@ -20,7 +20,6 @@
 #' @return A shiny application
 #' @export
 #'
-#' @examples
 conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_text_var, date_var, sentiment_var,
                                    size = 2, umap_height = 600, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
 
@@ -106,7 +105,6 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                           shiny::column(2, shiny::textInput("Regex", "Pattern to filter",  value = NULL)),
                                           shiny::column(1, shiny::div(style = "margin-top: 25px;", shiny::actionButton("filterPattern", "Filter", class = "btn btn-primary"))),
                                           shiny::column(1, shiny::div(style = "margin-top: 25px;", shiny::actionButton("reset", "Reset", class = "btn btn-light"))),
-                                          shiny::column(1, offset = 4, shiny::numericInput("n", "Posts per page", 10, min = 1, max = 200)),
                                           shiny::column(1, shiny::div(style = "margin-top: 25px;", shiny::actionButton("delete", "Delete selections", class = 'btn-danger')))
                                         ),
                                         shiny::br(),
@@ -293,7 +291,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
         dplyr::select(`ID` = original_id, `Text` = text_var,
                       `Colour Variable` = colour_var, ..., !!sentiment_sym)
 
-      DT::datatable(df, filter = "top", options = list(pageLength = input$n,
+      DT::datatable(df, filter = "top", options = list(pageLength = 25,
                                                        dom = '<"top" pifl>', autoWidth = FALSE), #TODO check adding l worked
                     style = "bootstrap", rownames = FALSE,
                     caption = htmltools::tags$caption("Selected Mentions", style="color:white"),
@@ -410,7 +408,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       }
 
     })
-
+    #render UI titles ----
     output$volumeTitles <- renderUI({
       if(input$toggleVolumetitles == "TRUE"){
         tagList(
