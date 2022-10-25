@@ -87,25 +87,18 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                         # shinythemes::themeSelector(),
                                         theme = shinythemes::shinytheme(theme = "superhero"),
                                         shiny::fluidRow(
-                                          shiny::column(2, shiny::textInput("remainingName", "File Name", value = NULL, placeholder = "filename excluding .csv")),
-                                          shiny::column(1, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadAll", "Download All Data", class = "btn btn-success")))
-                                        ),
-                                        shiny::br(),
-                                        shiny::fluidRow(
+                                          shiny::column(2, shiny::textInput("remainingName", "All Data ", value = NULL, placeholder = "filename excluding .csv")),
+                                          shiny::column(1, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadAll", "Save", class = "btn btn-success"))),
+                                          shiny::column(2, shiny::textInput("fileName", "Selected Data", value = NULL, placeholder = "filename excluding .csv")),
+                                          shiny::column(1, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadData", "Save ",class = "btn btn-success" ))),
                                           shiny::column(2, shiny::sliderInput( "x1","V1 Range",step = 5,  -100, 100, c(-20, 20))),
-                                          shiny::column(2, shiny::sliderInput( "y1","V2 Range",step = 5, -100, 100, c(-20, 20)))
+                                          shiny::column(2, shiny::sliderInput( "y1","V2 Range",step = 5, -100, 100, c(-20, 20))),
                                         ),
-                                        shiny::br(),
-                                        shiny::fluidRow(
-                                          shiny::column(2, shiny::textInput("fileName", "File Name", value = NULL, placeholder = "filename excluding .csv")),
-                                          shiny::column(2, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadData", "Download Selections",class = "btn btn-success" )))
-                                        ),
-                                        shiny::br(),
                                         shiny::fluidRow(
                                           shiny::column(2, shiny::textInput("Regex", "Pattern to filter",  value = NULL)),
-                                          shiny::column(1, shiny::div(style = "margin-top: 25px;", shiny::actionButton("filterPattern", "Filter", class = "btn btn-primary"))),
-                                          shiny::column(1, shiny::div(style = "margin-top: 25px;", shiny::actionButton("reset", "Reset", class = "btn btn-light"))),
-                                          shiny::column(1, shiny::div(style = "margin-top: 25px;", shiny::actionButton("delete", "Delete selections", class = 'btn-danger')))
+                                          shiny::column(1, shiny::div(style = "margin-top: 25px;", shiny::actionButton("filterPattern", "Filter Data", class = "btn btn-primary"))),
+                                          shiny::column(2, shiny::div(style = "margin-top: 25px;", shiny::actionButton("reset", "Reset Pattern", class = "btn btn-light"))),
+                                          shiny::column(2, offset = 1, shiny::div(style = "margin-top: 25px;", shiny::actionButton("delete", "Delete selections", class = 'btn-danger')))
                                         ),
                                         shiny::br(),
                                         shiny::fluidRow(
@@ -291,7 +284,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
         dplyr::select(`ID` = original_id, `Text` = text_var,
                       `Colour Variable` = colour_var, ..., !!sentiment_sym)
 
-      DT::datatable(df, filter = "top", options = list(pageLength = 25,
+      DT::datatable(df, filter = "top", options = list(pageLength = input$n,
                                                        dom = '<"top" pifl>', autoWidth = FALSE), #TODO check adding l worked
                     style = "bootstrap", rownames = FALSE,
                     caption = htmltools::tags$caption("Selected Mentions", style="color:white"),
