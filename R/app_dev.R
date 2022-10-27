@@ -20,8 +20,8 @@
 #' @return A shiny application
 #' @export
 #'
-conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_text_var, date_var, sentiment_var,
-                                   size = 2, umap_height = 600, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
+conversation_landscape <- ffunction(data,..., id,text_var,colour_var, cleaned_text_var, date_var, sentiment_var,
+                                    size = 2, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
 
   #Modified version of vol plot
   .plot_volume_over_time <- function(df, date_var , unit = "week",  fill = "#0f50d2"){
@@ -38,6 +38,8 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       ggplot2::scale_x_date(date_breaks = "1 months", date_labels = "%d-%b") +
       ggplot2::theme(legend.position = "none",
                      axis.text.x = element_text(angle = 90))
+
+
   }
 
   #Modified version of token plots
@@ -80,35 +82,47 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
   # hide UI ----
   ui <-
     shiny::navbarPage("Conversation Landscape", theme = shinythemes::shinytheme("cosmo"), position = "fixed-top",
+                      tags$style(type="text/css", "body {padding-top: 70px;}"),
                       shiny::tabPanel("Survey the Landscape",
                                       #---- Landscape Tab----
-                                      shiny::hr(),
                                       shiny::fluidPage(
                                         # shinythemes::themeSelector(),
-                                        theme = shinythemes::shinytheme(theme = "superhero"),
+                                        theme = shinythemes::shinytheme(theme = "cosmo"),
                                         shiny::fluidRow(
-                                          shiny::column(2, shiny::textInput("remainingName", "All Data ", value = NULL, placeholder = "filename excluding .csv")),
-                                          shiny::column(1, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadAll", "Save", class = "btn btn-success"))),
-                                          shiny::column(2, shiny::textInput("fileName", "Selected Data", value = NULL, placeholder = "filename excluding .csv")),
-                                          shiny::column(1, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadData", "Save ",class = "btn btn-success" ))),
-                                          shiny::column(2, shiny::sliderInput( "x1","V1 Range",step = 5,  -100, 100, c(-20, 20))),
-                                          shiny::column(2, shiny::sliderInput( "y1","V2 Range",step = 5, -100, 100, c(-20, 20))),
-                                        ),
-                                        shiny::fluidRow(
+                                          shiny::column(2, shiny::textInput("remainingName", "File Name", value = NULL, placeholder = "filename excluding .csv")),
+                                          shiny::column(2, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadAll", "Download", class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;"))),
                                           shiny::column(2, shiny::textInput("Regex", "Pattern to filter",  value = NULL)),
-                                          shiny::column(1, shiny::div(style = "margin-top: 25px;", shiny::actionButton("filterPattern", "Filter Data", class = "btn btn-primary"))),
-                                          shiny::column(2, shiny::div(style = "margin-top: 25px;", shiny::actionButton("reset", "Reset Pattern", class = "btn btn-light"))),
-                                          shiny::column(2, offset = 1, shiny::div(style = "margin-top: 25px;", shiny::actionButton("delete", "Delete selections", class = 'btn-danger')))
+                                          shiny::column(1, shiny::div(style = "margin-top: 25px;", shiny::actionButton("filterPattern", "Filter", class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none; padding: 10px 20px;"))),
+                                          shiny::column(1, shiny::div(style = "margin-top: 25px;", shiny::actionButton("reset", "Reset", class = "btn btn-light", style = "background: #2E2E33; border-radius: 100px; color: #ffffff; border:none; padding: 10px 20px;"))),
+                                          shiny::column(2, shiny::textInput("fileName", "File Name", value = NULL, placeholder = "filename excluding .csv")),
+                                          shiny::column(2, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadData", "Download",class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;")))
                                         ),
-                                        shiny::br(),
-                                        shiny::fluidRow(
-                                          shiny::column(7, shinycssloaders::withSpinner(plotly::plotlyOutput("umapPlot"))),
-                                          shiny::column(5, shinycssloaders::withSpinner(DT::dataTableOutput("highlightedTable"))),
+                                        shiny::column(6, style = "width:50%; height: 10000px; position: relative;",
+                                                      div(id = "graph",
+
+                                                          shinycssloaders::withSpinner(plotly::plotlyOutput("umapPlot", height = 600)),
+                                                          div(id = "button",
+                                                              shiny::fluidRow(
+                                                                shiny::actionButton("delete", "Delete selections", class = 'btn-warning', style = "position: absolute; bottom 7px; right: 7px; border-radius: 100px; color: #ffffff; border:none;")),
+                                                          ),
+                                                          shiny::br(),
+                                                          shiny::br(),
+                                                          shiny::fluidRow(
+                                                            shiny::column(6, div(id = "slider1",
+                                                                                 style = "width: 50%;",
+                                                                                 shiny::sliderInput("x1","V1 Range",step = 5,  -100, 100, c(-20, 20))),),
+                                                            shiny::column(6,
+                                                                          div(id = "slider2", style = "width: 50%;",
+                                                                              shiny::sliderInput( "y1","V2 Range",step = 5, -100, 100, c(-20, 20)))
+                                                            ),
+                                                          )
+                                                      )
                                         ),
+                                        shiny::column(5, shinycssloaders::withSpinner(DT::dataTableOutput("highlightedTable"))),
                                       ),),
                       #---- Distribution Tab ----
                       shiny::br(),
-                      shiny::tabPanel("Distribution Plots", shiny::fluidPage(theme = shinythemes::shinytheme('superhero')),
+                      shiny::tabPanel("Distribution Plots", shiny::fluidPage(theme = shinythemes::shinytheme('cosmo')),
                                       shiny::br(),
                                       shiny::p("In this tab you can view, and download if necessary, charts designed to help you understand your selections."),
                                       shiny::p("Below you will find four charts; sentiment distribution, volume over time, tokens counter and a sampled bigram network."),
@@ -176,7 +190,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                       ),
                       shiny::br(),
                       #---- Bigram Tab ----
-                      shiny::tabPanel("Bigram Network", shiny::fluidPage(theme = shinythemes::shinytheme('superhero')),
+                      shiny::tabPanel("Bigram Network", shiny::fluidPage(theme = shinythemes::shinytheme('cosmo')),
                                       shiny::br(),
                                       # Bigram plot ----
 
@@ -253,14 +267,15 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                         key = ~id_var,
                         #make sure mention_content = text variable of your data
                         text = ~paste("<br> Post:", text_var),
-                        hoverinfo = "text", marker = list(size = size), height = umap_height) %>%
+                        hoverinfo = "text", marker = list(size = size), height = 600) %>%
         plotly::layout(dragmode = "lasso",
                        legend= list(itemsizing='constant')) %>%
         plotly::event_register(event = "plotly_selected")
     })
 
-    #Instantiate a reactive value, then update that value dynamically when points are selected
+    #Instantiate a reactive value, then update that value dynamically when points are selected.
     selected_range <- shiny::reactiveVal({})
+
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       selected_range(plotly::event_data("plotly_selected"))
     })
@@ -281,14 +296,13 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
 
       df <- df_filtered %>%
         #Select the columns you want to see from your data
-        dplyr::select(`ID` = original_id, `Text` = text_var,
+        dplyr::select(`Text` = text_var,
                       `Colour Variable` = colour_var, ..., !!sentiment_sym)
 
-      DT::datatable(df, filter = "top", options = list(pageLength = input$n,
-                                                       dom = '<"top" pifl>', autoWidth = FALSE), #TODO check adding l worked
+      DT::datatable(df, filter = "top", options = list(pageLength = 25,
+                                                       dom = '<"top" if> rt<"bottom"lp>', autoWidth = FALSE), #TODO check adding l worked
                     style = "bootstrap", rownames = FALSE,
-                    caption = htmltools::tags$caption("Selected Mentions", style="color:white"),
-                    escape = FALSE)
+                    escape = FALSE) #Add escape = False to ensure the HTML clicks work properly
     })
 
     #--- Download Handler Data ----
@@ -316,77 +330,66 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       shiny::debounce(2000)
 
     #--- Reactive plots + Observes ----
-
-    sentiment_reactive <- reactive({
-      reactive_data() %>%
-        HelpR::plot_sentiment_distribution(sentiment_var = {{sentiment_var}}) +
-        HelpR::theme_microsoft_discrete() +
-        ggplot2::theme(legend.position = "none") +
-        ggplot2::labs(title = paste0(input$sentimentTitle),
-                      caption = paste0(input$sentimentCaption),
-                      subtitle = paste0(input$sentimentSubtitle),
-                      x = paste0(input$sentimentXlabel),
-                      y = paste0(input$sentimentYlabel))
-    })
-
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$sentimentPlot <- renderPlot({
-        sentiment_reactive()
+        df_filtered %>%
+          HelpR::plot_sentiment_distribution(sentiment_var = {{sentiment_var}}) +
+          HelpR::theme_microsoft_discrete() +
+          ggplot2::theme(legend.position = "none") +
+          ggplot2::labs(title = paste0(input$sentimentTitle),
+                        caption = paste0(input$sentimentCaption),
+                        subtitle = paste0(input$sentimentSubtitle),
+                        x = paste0(input$sentimentXlabel),
+                        y = paste0(input$sentimentYlabel))
       }, res = 100,
       width = function() input$sentimentWidth,
       height = function() input$sentimentHeight)
     })
-
     #---- Token plot ----
-    token_reactive <- reactive({
-      reactive_data() %>%
-        .plot_tokens_counter(text_var = {{cleaned_text_var}}, top_n = 25, fill = delayedTokenHex()) +
-        ggplot2::labs(title = paste0(input$tokenTitle),
-                      caption = paste0(input$tokenCaption),
-                      subtitle = paste0(input$tokenSubtitle),
-                      x = paste0(input$tokenXlabel),
-                      y = paste0(input$tokenYlabel)) +
-        ggplot2::scale_fill_manual(values = input$tokenHex)
-    })
-
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$tokenPlot <- renderPlot({
-        token_reactive()
+        df_filtered %>%
+          .plot_tokens_counter(text_var = {{cleaned_text_var}}, top_n = 25, fill = delayedTokenHex()) +
+          ggplot2::labs(title = paste0(input$tokenTitle),
+                        caption = paste0(input$tokenCaption),
+                        subtitle = paste0(input$tokenSubtitle),
+                        x = paste0(input$tokenXlabel),
+                        y = paste0(input$tokenYlabel)) +
+          ggplot2::scale_fill_manual(values = input$tokenHex)
       }, res = 100,
       width = function() input$tokenWidth,
       height = function() input$tokenHeight)
     })
-
     #---- Volume Plot ----
-    volume_reactive <- reactive({
-      vol_data <- reactive_data() %>%
-        dplyr::filter(date >= input$dateRange[[1]], date <= input$dateRange[[2]])
-
-      vol_plot <- vol_data %>%
-        .plot_volume_over_time(date = date, unit =  input$dateBreak, fill = input$volumeHex) +
-        ggplot2::labs(title = paste0(input$volumeTitle),
-                      caption = paste0(input$volumeCaption),
-                      subtitle = paste0(input$volumeSubtitle),
-                      x = paste0(input$volumeXlabel),
-                      y = paste0(input$volumeYlabel))
-
-      if(!input$dateSmooth == "none"){
-        if(input$smoothSe == "FALSE"){
-          vol_plot <- vol_plot +
-            ggplot2::geom_smooth(method = input$dateSmooth, se = FALSE, colour = input$smoothColour)
-        }else {
-          vol_plot <- vol_plot+
-            ggplot2::geom_smooth(method = input$dateSmooth, colour = input$smoothColour)
-        }
-      }
-
-      return(vol_plot)
-    })
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$volumePlot <- renderPlot({
-        volume_reactive()
-      },
-      res = 100,
+
+        vol_data <- data %>%
+          dplyr::filter(date >= input$dateRange[[1]], date <= input$dateRange[[2]])
+
+        vol_plot <- vol_data %>%
+          .plot_volume_over_time(date = date, unit =  input$dateBreak, fill = input$volumeHex) +
+          ggplot2::labs(title = paste0(input$volumeTitle),
+                        caption = paste0(input$volumeCaption),
+                        subtitle = paste0(input$volumeSubtitle),
+                        x = paste0(input$volumeXlabel),
+                        y = paste0(input$volumeYlabel))
+
+        if(!input$dateSmooth == "none"){
+          if(input$smoothSe == "FALSE"){
+            vol_plot <- vol_plot +
+              ggplot2::geom_smooth(method = input$dateSmooth, se = FALSE, colour = input$smoothColour)
+          }else {
+            vol_plot <- vol_plot+
+              ggplot2::geom_smooth(method = input$dateSmooth, colour = input$smoothColour)
+          }
+        }
+
+
+        return(vol_plot)
+
+
+      }, res = 100,
       width = function() input$volumeWidth,
       height = function() input$volumeHeight)
     })
@@ -401,7 +404,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       }
 
     })
-    #render UI titles ----
+
     output$volumeTitles <- renderUI({
       if(input$toggleVolumetitles == "TRUE"){
         tagList(
@@ -418,6 +421,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
         )
       }
     })
+
     output$sentimentTitles <- renderUI({
       if(input$toggleSentimenttitles == "TRUE"){
         tagList(
@@ -459,10 +463,10 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
 
         if(length(selected_range()) > 1){
           if(!length(selected_range()) >= 5000){
-            bigram <- reactive_data() %>%
+            bigram <- df_filtered %>%
               JPackage::make_bigram_viz(text_var = {{cleaned_text_var}}, clean_text = FALSE, min = 5)
           }else{
-            bigram <- reactive_data() %>%
+            bigram <- df_filtered %>%
               dplyr::sample_n(5000) %>%
               JPackage::make_bigram_viz(text_var = {{cleaned_text_var}}, clean_text = FALSE, min = 5)
           }
@@ -473,22 +477,20 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       width = function() input$bigramWidth,
       height = function() input$bigramHeight)
     })
-
     #---- Download boxes for plots ----
-    download_box <- function(exportname, plot, width, height){
+    download_box <- function(exportname, plot) {
       downloadHandler(
         filename = function() {
           paste(exportname, Sys.Date(), ".png", sep = "")
         },
         content = function(file) {
-          ggsave(file, plot = plot, device = "png", width = width, height = height, unit = "mm", bg = "white", dpi = 400)
+          ggsave(file, plot = plot, device = "png", width = 8)
         }
       )
     }
-    output$saveVolume <- download_box("volume_plot", volume_reactive(),height = input$volumeHeight, width = input$volumeWidth)
-    output$saveToken <- download_box("token_plot", token_reactive(), height = input$tokenHeight, width = input$tokenWidth)
-    output$saveSentiment <- download_box("sentiment_plot", sentiment_reactive(), height = input$sentimentHeight, width = input$sentimentWidth)
-
+    output$saveVolume <- download_box("volume_plot", volume_reactive())
+    output$saveToken <- download_box("token_plot", token_reactive())
+    output$saveSentiment <- download_box("sentiment_plot", sentiment_reactive())
   }
   #---- hide app render ----
   shiny::shinyApp(ui, server)
