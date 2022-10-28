@@ -20,7 +20,7 @@
 #' @return A shiny application
 #' @export
 #'
-conversation_landscape <- ffunction(data,..., id,text_var,colour_var, cleaned_text_var, date_var, sentiment_var,
+conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_text_var, date_var, sentiment_var,
                                     size = 2, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
 
   #Modified version of vol plot
@@ -86,6 +86,7 @@ conversation_landscape <- ffunction(data,..., id,text_var,colour_var, cleaned_te
                       shiny::tabPanel("Survey the Landscape",
                                       #---- Landscape Tab----
                                       shiny::fluidPage(
+                                        shinyWidgets::setSliderColor(color = c("#ff7518", "#ff7518"), sliderId = c(1, 2)),
                                         # shinythemes::themeSelector(),
                                         theme = shinythemes::shinytheme(theme = "cosmo"),
                                         shiny::fluidRow(
@@ -210,8 +211,6 @@ conversation_landscape <- ffunction(data,..., id,text_var,colour_var, cleaned_te
                       ),
 
     )
-
-
   #---- Server ----
   server <- function(input, output, session){
 
@@ -244,7 +243,6 @@ conversation_landscape <- ffunction(data,..., id,text_var,colour_var, cleaned_te
       req(length(remove_range$keep_keys) > 0)
       remove_range$remove_keys <- selected_range()$key
       remove_range$keep_keys <- remove_range$keep_keys[!remove_range$keep_keys %in% remove_range$remove_keys]
-
     })
     #---- reactive data ---
     reactive_data <- shiny::reactive({
