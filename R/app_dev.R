@@ -23,9 +23,9 @@
 conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_text_var, date_var, sentiment_var,
                                    size = 2, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
 
+  #Modified version of vol plot ----
   library(htmltools)
   library(tableHTML)
-  #Modified version of vol plot
   .plot_volume_over_time <- function(df, date_var , unit = "week",  fill = "#0f50d2"){
 
     date_sym <- rlang::ensym(date_var)
@@ -85,17 +85,17 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
   ui <-
     shiny::navbarPage("Conversation Landscape", theme = shinythemes::shinytheme("cosmo"), position = "fixed-top",
                       tags$style(type="text/css", "body {padding-top: 70px;}"), #Prevents the navbar from eating body of app
-
-                      shinyWidgets::setSliderColor(color = rep("#ff7518", 10), sliderId = c(1:10)), #colours all 10  sliders orange
+                      #colours all 10  sliders orange
+                      shinyWidgets::setSliderColor(color = rep("#ff7518", 10), sliderId = c(1:10)),
                       shiny::tabPanel("Survey the Landscape",
                                       #---- Landscape Tab----
                                       shiny::fluidPage(
                                         # shinythemes::themeSelector(),
                                         theme = shinythemes::shinytheme(theme = "cosmo"),
                                         shiny::fluidRow(
-                                          shiny::column(2, shiny::textInput("remainingName", "File Name", value = NULL, placeholder = "filename excluding .csv")),
-                                          shiny::column(1, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadAll", "Download", class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;"))),
-                                          shiny::column(3, shinyWidgets::searchInput(
+                                          shiny::column(2, style = "padding-right: 0px; border: none;",  shiny::textInput("remainingName", "File Name", value = NULL, placeholder = "filename excluding .csv")),
+                                          shiny::column(1, style = "padding-left: 10px; padding-right: 20px;", shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadAll", "Download", class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;"))),
+                                          shiny::column(3, style = "padding-left: 20px; padding-right: 10px;", shinyWidgets::searchInput(
                                             inputId = "filterPattern",
                                             label = "Pattern to search text with",
                                             placeholder = "A placeholder",
@@ -109,7 +109,6 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                         ),
                                         shiny::column(6, style = "width:50%; height: 10000px; position: relative;",
                                                       div(id = "graph",
-
                                                           shinycssloaders::withSpinner(plotly::plotlyOutput("umapPlot", height = 600)),
                                                           div(id = "button",
                                                               shiny::fluidRow(
