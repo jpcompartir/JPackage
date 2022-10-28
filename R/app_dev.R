@@ -94,10 +94,16 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                         theme = shinythemes::shinytheme(theme = "cosmo"),
                                         shiny::fluidRow(
                                           shiny::column(2, shiny::textInput("remainingName", "File Name", value = NULL, placeholder = "filename excluding .csv")),
-                                          shiny::column(2, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadAll", "Download", class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;"))),
-                                          shiny::column(2, shiny::textInput("Regex", "Pattern to filter",  value = NULL)),
-                                          shiny::column(1, style = "padding: 0px;", shiny::div(style = "margin-top: 25px; width: 100%;", shiny::actionButton("filterPattern", "Filter",  style ="width: 100%; background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;"))),
-                                          shiny::column(1, slyle = "padding: 0px;", shiny::div(style = "margin-top: 25px; width: 100%;", shiny::actionButton("reset", "  Reset", style ="width: 100%; background: #2E2E33; border-radius: 100px; color: #ffffff; border:none;"))),
+                                          shiny::column(1, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadAll", "Download", class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;"))),
+                                          shiny::column(3, shinyWidgets::searchInput(
+                                            inputId = "filterPattern",
+                                            label = "Pattern to search text with",
+                                            placeholder = "A placeholder",
+                                            btnSearch = icon("search"),
+                                            btnReset = icon("remove"),
+                                            width = "100%",
+                                            value = ""
+                                          )),
                                           shiny::column(2, shiny::textInput("fileName", "File Name", value = NULL, placeholder = "filename excluding .csv")),
                                           shiny::column(2, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadData", "Download",class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;")))
                                         ),
@@ -107,7 +113,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                           shinycssloaders::withSpinner(plotly::plotlyOutput("umapPlot", height = 600)),
                                                           div(id = "button",
                                                               shiny::fluidRow(
-                                                                shiny::actionButton("delete", "Delete selections", class = 'btn-warning', style = "position: absolute; bottom 7px; right: 7px; border-radius: 100px; color: #ffffff; border:none;")),
+                                                                shiny::actionButton("delete", "Delete selections", class = 'btn-warning', style = "position: absolute; bottom 7px; right: 7px; background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;")),
                                                           ),
                                                           shiny::br(),
                                                           shiny::br(),
@@ -144,9 +150,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                               right = TRUE
                                                             ),
                                                             shiny::uiOutput("sentimentTitles"),
-                                                            shiny::downloadButton(outputId = "saveSentiment", class = '<button class="btn-download" id="btn-auto-click">
-                                                                  <div class="arrow"></div>
-                                                                  </button>'),
+                                                            shiny::downloadButton(outputId = "saveSentiment", class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;"),
                                         ),
                                         shiny::mainPanel(
                                           shinycssloaders::withSpinner(shiny::plotOutput("sentimentPlot",height = plotting_heights, width  = plotting_widths))
@@ -174,9 +178,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                               right = TRUE
                                                             ),
                                                             shiny::uiOutput("volumeTitles"),
-                                                            shiny::downloadButton(outputId = "saveVolume", class = '<button class="btn-download" id="btn-auto-click">
-                                                                  <div class="arrow"></div>
-                                                                  </button>'),
+                                                            shiny::downloadButton(outputId = "saveVolume", class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;"),
                                         ),
                                         shiny::mainPanel(
                                           shinycssloaders::withSpinner(shiny::plotOutput("volumePlot", height = plotting_heights,width  = plotting_widths)))
@@ -198,9 +200,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                             ),
                                                             shiny::textInput("tokenHex", "colour", value ="#0f50d2"),
                                                             shiny::uiOutput("tokenTitles"),
-                                                            shiny::downloadButton(outputId = "saveToken", class = '<button class="btn-download" id="btn-auto-click">
-                                                                  <div class="arrow"></div>
-                                                                  </button>'),
+                                                            shiny::downloadButton(outputId = "saveToken", class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;"),
                                         ),
                                         shiny::mainPanel(
                                           shinycssloaders::withSpinner(shiny::plotOutput("tokenPlot", height = plotting_heights, width  = plotting_widths)))
@@ -271,7 +271,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
         dplyr::filter(V1 > input$x1[[1]], V1 < input$x1[[2]], V2 > input$y1[[1]], V2 < input$y1[[2]]) %>%
         dplyr::filter(!colour_var %in% input$cluster,
                       id_var %in% remove_range$keep_keys) %>%
-        dplyr::filter(grepl(pattern(), text_var, ignore.case = TRUE))
+        dplyr::filter(grepl(input$filterPattern, text_var, ignore.case = TRUE))
     })
 
     #--- UMAP Plot ----
