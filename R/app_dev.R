@@ -86,7 +86,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
     shiny::navbarPage("Conversation Landscape", theme = shinythemes::shinytheme("cosmo"), position = "fixed-top",
                       tags$style(type="text/css", "body {padding-top: 70px;}"), #Prevents the navbar from eating body of app
 
-                      shinyWidgets::setSliderColor(color = c("#ff7518", "#ff7518"), sliderId = c(1, 2)), #colours both sliders orange
+                      shinyWidgets::setSliderColor(color = rep("#ff7518", 10), sliderId = c(1:10)), #colours all 10  sliders orange
                       shiny::tabPanel("Survey the Landscape",
                                       #---- Landscape Tab----
                                       shiny::fluidPage(
