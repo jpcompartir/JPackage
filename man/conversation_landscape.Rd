@@ -14,7 +14,6 @@ conversation_landscape(
   date_var,
   sentiment_var,
   size = 2,
-  umap_height = 600,
   x_var = V1,
   y_var = V2,
   type = "scattergl",
