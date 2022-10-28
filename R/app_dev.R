@@ -137,7 +137,12 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                             #Should functionise all of this and use map to render the UI elements.
                                                             shiny::sliderInput("sentimentHeight","Height",  min = 100, max = 800, value = 400, step = 50),
                                                             shiny::sliderInput("sentimentWidth","Width",  min = 100, max = 800, value = 400, step = 50),
-                                                            shiny::selectInput(inputId = "toggleSentimenttitles", label = "Customise Titles?", choices = c("TRUE", "FALSE"), selected = "FALSE"),
+                                                            shinyWidgets::materialSwitch(
+                                                              inputId = "toggleSentimenttitles",
+                                                              label = "Customise Titles?",
+                                                              status = "primary",
+                                                              right = TRUE
+                                                            ),
                                                             shiny::uiOutput("sentimentTitles"),
                                                             shiny::downloadButton(outputId = "saveSentiment", class = '<button class="btn-download" id="btn-auto-click">
                                                                   <div class="arrow"></div>
@@ -162,7 +167,12 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                             shiny::selectInput(inputId = "dateSmooth", label = "Smooth", choices = c("none", "loess", "lm", "glm", "gam"), selected = "none"),
                                                             shiny::uiOutput("smoothControls"),
                                                             shiny::textInput("volumeHex", "colour", value ="#107C10"),
-                                                            shiny::selectInput(inputId = "toggleVolumetitles", label = "Customise Titles?", choices = c("TRUE", "FALSE"), selected = "FALSE"),
+                                                            shinyWidgets::materialSwitch(
+                                                              inputId = "toggleVolumetitles",
+                                                              label = "Customise Titles?",
+                                                              status = "primary",
+                                                              right = TRUE
+                                                            ),
                                                             shiny::uiOutput("volumeTitles"),
                                                             shiny::downloadButton(outputId = "saveVolume", class = '<button class="btn-download" id="btn-auto-click">
                                                                   <div class="arrow"></div>
@@ -180,7 +190,12 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                         shiny::sidebarPanel(width = 2,
                                                             shiny::sliderInput("tokenHeight","Height",  min = 100, max = 800, value = 400, step = 50),
                                                             shiny::sliderInput("tokenWidth","Width",  min = 100, max = 800, value = 400, step = 50),
-                                                            shiny::selectInput(inputId = "toggleTokentitles", label = "Customise Titles?", choices = c("TRUE", "FALSE"), selected = "FALSE"),
+                                                            shinyWidgets::materialSwitch(
+                                                              inputId = "toggleTokentitles",
+                                                              label = "Customise Titles?",
+                                                              status = "primary",
+                                                              right = TRUE
+                                                            ),
                                                             shiny::textInput("tokenHex", "colour", value ="#0f50d2"),
                                                             shiny::uiOutput("tokenTitles"),
                                                             shiny::downloadButton(outputId = "saveToken", class = '<button class="btn-download" id="btn-auto-click">
