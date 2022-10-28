@@ -21,8 +21,10 @@
 #' @export
 #'
 conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_text_var, date_var, sentiment_var,
-                                    size = 2, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
+                                   size = 2, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
 
+  library(htmltools)
+  library(tableHTML)
   #Modified version of vol plot
   .plot_volume_over_time <- function(df, date_var , unit = "week",  fill = "#0f50d2"){
 
@@ -82,11 +84,12 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
   # hide UI ----
   ui <-
     shiny::navbarPage("Conversation Landscape", theme = shinythemes::shinytheme("cosmo"), position = "fixed-top",
-                      tags$style(type="text/css", "body {padding-top: 70px;}"),
+                      tags$style(type="text/css", "body {padding-top: 70px;}"), #Prevents the navbar from eating body of app
+
+                      shinyWidgets::setSliderColor(color = c("#ff7518", "#ff7518"), sliderId = c(1, 2)), #colours both sliders orange
                       shiny::tabPanel("Survey the Landscape",
                                       #---- Landscape Tab----
                                       shiny::fluidPage(
-                                        shinyWidgets::setSliderColor(color = c("#ff7518", "#ff7518"), sliderId = c(1, 2)),
                                         # shinythemes::themeSelector(),
                                         theme = shinythemes::shinytheme(theme = "cosmo"),
                                         shiny::fluidRow(
@@ -110,10 +113,10 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                           shiny::br(),
                                                           shiny::fluidRow(
                                                             shiny::column(6, div(id = "slider1",
-                                                                                 style = "width: 50%;",
+                                                                                 style = "width: 100%;",
                                                                                  shiny::sliderInput("x1","V1 Range",step = 5,  -100, 100, c(-20, 20))),),
                                                             shiny::column(6,
-                                                                          div(id = "slider2", style = "width: 50%;",
+                                                                          div(id = "slider2", style = "width: 100%;",
                                                                               shiny::sliderInput( "y1","V2 Range",step = 5, -100, 100, c(-20, 20)))
                                                             ),
                                                           )
@@ -124,7 +127,6 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                       #---- Distribution Tab ----
                       shiny::br(),
                       shiny::tabPanel("Distribution Plots", shiny::fluidPage(theme = shinythemes::shinytheme('cosmo')),
-                                      shiny::br(),
                                       shiny::p("In this tab you can view, and download if necessary, charts designed to help you understand your selections."),
                                       shiny::p("Below you will find four charts; sentiment distribution, volume over time, tokens counter and a sampled bigram network."),
                                       #---- Sentiment plot ----
@@ -211,6 +213,8 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                       ),
 
     )
+
+
   #---- Server ----
   server <- function(input, output, session){
 
@@ -243,6 +247,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       req(length(remove_range$keep_keys) > 0)
       remove_range$remove_keys <- selected_range()$key
       remove_range$keep_keys <- remove_range$keep_keys[!remove_range$keep_keys %in% remove_range$remove_keys]
+
     })
     #---- reactive data ---
     reactive_data <- shiny::reactive({
@@ -458,7 +463,6 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
     #---- Bigram Plot ----
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$bigramPlot <- renderPlot({
-
         if(length(selected_range()) > 1){
           if(!length(selected_range()) >= 5000){
             bigram <- df_filtered %>%

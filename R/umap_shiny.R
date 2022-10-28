@@ -40,7 +40,9 @@ umap_shiny <- function(data,..., text_var, colour_var,  size = 2,
   #---- hide UI ----
   ui <- shiny::fluidPage(
     # shinythemes::themeSelector(),
-    theme = shinythemes::shinytheme(theme = "superhero"),
+
+    theme = shinythemes::shinytheme(theme = "cosmo"),
+    shinyWidgets::setSliderColor(color = c("#ff7518", "#ff7518"), sliderId = c(1, 2)),
     shiny::fluidRow(
       shiny::column(2, shiny::textInput("remainingName", "File Name", "data_cleaned")),
       shiny::column(1, shiny::div(style = "margin-top: 20px;",shiny::downloadButton("downloadAll", "Download All Data", class = "btn btn-success")))
