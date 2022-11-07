@@ -109,9 +109,9 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                           shiny::column(2, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadData", "Download",class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;")))
                                         ),
                                         shiny::column(6, style = "width:50%; height: 10000px; position: relative;",
-                                                      shiny::div(id = "graph",
+                                                      div(id = "graph",
                                                           shinycssloaders::withSpinner(plotly::plotlyOutput("umapPlot", height = 600)),
-                                                          shiny::div(id = "button",
+                                                          div(id = "button",
                                                               shiny::fluidRow(
                                                                 shiny::actionButton("delete", "Delete selections", class = 'btn-warning', style = "position: absolute; bottom 7px; right: 7px; background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;")),
                                                           ),
@@ -122,7 +122,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                                                  style = "width: 100%;",
                                                                                  shiny::sliderInput("x1","V1 Range",step = 5,  -100, 100, c(-20, 20))),),
                                                             shiny::column(6,
-                                                                          shiny::div(id = "slider2", style = "width: 100%;",
+                                                                          div(id = "slider2", style = "width: 100%;",
                                                                               shiny::sliderInput( "y1","V2 Range",step = 5, -100, 100, c(-20, 20)))
                                                             ),
                                                           )
@@ -131,7 +131,6 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                         shiny::column(5, shinycssloaders::withSpinner(DT::dataTableOutput("highlightedTable"))),
                                       ),),
                       #---- Distribution Tab ----
-                      shiny::br(),
                       shiny::tabPanel("Distribution Plots", shiny::fluidPage(theme = shinythemes::shinytheme('cosmo')),
                                       shiny::p("In this tab you can view, and download if necessary, charts designed to help you understand your selections."),
                                       shiny::p("Below you will find four charts; sentiment distribution, volume over time, tokens counter and a sampled bigram network."),
@@ -365,7 +364,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
     })
     #---- Token plot ----
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
-      output$tokenPlot <- renderPlot({
+      output$tokenPlot <- shiny::renderPlot({
         df_filtered %>%
           .plot_tokens_counter(text_var = {{cleaned_text_var}}, top_n = 25, fill = delayedTokenHex()) +
           ggplot2::labs(title = paste0(input$tokenTitle),
@@ -380,7 +379,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
     })
     #---- Volume Plot ----
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
-      output$volumePlot <- renderPlot({
+      output$volumePlot <- shiny::renderPlot({
 
         vol_data <- data %>%
           dplyr::filter(date >= input$dateRange[[1]], date <= input$dateRange[[2]])
@@ -496,12 +495,12 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
     })
     #---- Download boxes for plots ----
     download_box <- function(exportname, plot) {
-      downloadHandler(
+      shiny::downloadHandler(
         filename = function() {
           paste(exportname, Sys.Date(), ".png", sep = "")
         },
         content = function(file) {
-          ggsave(file, plot = plot, device = "png", width = 8)
+          ggplot2::ggsave(file, plot = plot, device = "png", width = 8)
         }
       )
     }

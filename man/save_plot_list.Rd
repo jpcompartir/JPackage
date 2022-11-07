@@ -4,7 +4,14 @@
 \alias{save_plot_list}
 \title{Save a list of plots to the current working directory}
 \usage{
-save_plot_list(plot_list, plot_type = "bigram", dpi = 700)
+save_plot_list(
+  plot_list,
+  plot_type = "bigram",
+  dpi = 700,
+  width = 9,
+  height = 6,
+  units = c("in", "cm", "mm", "px")
+)
 }
 \arguments{
 \item{plot_list}{Should be a named list of plots}
@@ -12,6 +19,12 @@ save_plot_list(plot_list, plot_type = "bigram", dpi = 700)
 \item{plot_type}{For saving prefix that gets pasted with name and .png = e.g. "bigram_microsoft_topic_1.png"}
 
 \item{dpi}{Resolution of saved image - higher number = higher quality}
+
+\item{width}{Plot width in specified units}
+
+\item{height}{Plot width in specified units}
+
+\item{units}{}
 }
 \value{
 does not return anything - saves plots to working directory
