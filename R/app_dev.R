@@ -26,6 +26,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
   #Modified version of vol plot ----
   library(htmltools)
   library(tableHTML)
+  library(shinyWidgets)
   .plot_volume_over_time <- function(df, date_var , unit = "week",  fill = "#0f50d2"){
 
     date_sym <- rlang::ensym(date_var)
@@ -99,8 +100,8 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                             inputId = "filterPattern",
                                             label = "Pattern to search text with",
                                             placeholder = "A placeholder",
-                                            btnSearch = icon("search"),
-                                            btnReset = icon("remove"),
+                                            btnSearch = shiny::icon("search"),
+                                            btnReset = shiny::icon("remove"),
                                             width = "100%",
                                             value = ""
                                           )),
@@ -108,9 +109,9 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                           shiny::column(2, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadData", "Download",class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;")))
                                         ),
                                         shiny::column(6, style = "width:50%; height: 10000px; position: relative;",
-                                                      div(id = "graph",
+                                                      shiny::div(id = "graph",
                                                           shinycssloaders::withSpinner(plotly::plotlyOutput("umapPlot", height = 600)),
-                                                          div(id = "button",
+                                                          shiny::div(id = "button",
                                                               shiny::fluidRow(
                                                                 shiny::actionButton("delete", "Delete selections", class = 'btn-warning', style = "position: absolute; bottom 7px; right: 7px; background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;")),
                                                           ),
@@ -121,7 +122,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                                                  style = "width: 100%;",
                                                                                  shiny::sliderInput("x1","V1 Range",step = 5,  -100, 100, c(-20, 20))),),
                                                             shiny::column(6,
-                                                                          div(id = "slider2", style = "width: 100%;",
+                                                                          shiny::div(id = "slider2", style = "width: 100%;",
                                                                               shiny::sliderInput( "y1","V2 Range",step = 5, -100, 100, c(-20, 20)))
                                                             ),
                                                           )
@@ -348,7 +349,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
 
     #--- Reactive plots + Observes ----
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
-      output$sentimentPlot <- renderPlot({
+      output$sentimentPlot <- shiny::renderPlot({
         df_filtered %>%
           HelpR::plot_sentiment_distribution(sentiment_var = {{sentiment_var}}) +
           HelpR::theme_microsoft_discrete() +
