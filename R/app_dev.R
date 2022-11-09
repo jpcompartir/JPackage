@@ -91,10 +91,11 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                       shiny::tabPanel("Survey the Landscape",
                                       #---- Landscape Tab----
                                       shiny::fluidPage(
+                                        gotop::use_gotop(),
                                         # shinythemes::themeSelector(),
                                         theme = shinythemes::shinytheme(theme = "cosmo"),
                                         shiny::fluidRow(
-                                          shiny::column(2, style = "padding-right: 0px; border: none;",  shiny::textInput("remainingName", "File Name", value = NULL, placeholder = "filename excluding .csv")),
+                                          shiny::column(2, style = "padding-right: 0px; border: none;",  shiny::textInput("remainingName", "All Data", value = NULL, placeholder = "filename")),
                                           shiny::column(1, style = "padding-left: 10px; padding-right: 20px;", shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadAll", "Download", class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;"))),
                                           shiny::column(3, style = "padding-left: 20px; padding-right: 10px;", shinyWidgets::searchInput(
                                             inputId = "filterPattern",
@@ -105,7 +106,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                             width = "100%",
                                             value = ""
                                           )),
-                                          shiny::column(2, shiny::textInput("fileName", "File Name", value = NULL, placeholder = "filename excluding .csv")),
+                                          shiny::column(2, shiny::textInput("fileName", "Selected Data", value = NULL, placeholder = "filename excluding .csv")),
                                           shiny::column(2, shiny::div(style = "margin-top: 25px;",shiny::downloadButton("downloadData", "Download",class = "btn btn-warning",  style = "background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;")))
                                         ),
                                         shiny::column(6, style = "width:50%; height: 10000px; position: relative;",
@@ -132,6 +133,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                       ),),
                       #---- Distribution Tab ----
                       shiny::tabPanel("Distribution Plots", shiny::fluidPage(theme = shinythemes::shinytheme('cosmo')),
+                                      gotop::use_gotop(),
                                       shiny::p("In this tab you can view, and download if necessary, charts designed to help you understand your selections."),
                                       shiny::p("Below you will find four charts; sentiment distribution, volume over time, tokens counter and a sampled bigram network."),
                                       #---- Sentiment plot ----
@@ -208,6 +210,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                       shiny::br(),
                       #---- Bigram Tab ----
                       shiny::tabPanel("Bigram Network", shiny::fluidPage(theme = shinythemes::shinytheme('cosmo')),
+                                      gotop::use_gotop(),
                                       shiny::br(),
                                       # Bigram plot ----
 
