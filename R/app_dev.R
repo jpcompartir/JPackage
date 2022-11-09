@@ -320,7 +320,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                       `Colour Variable` = colour_var, ..., !!sentiment_sym)
 
       DT::datatable(df, filter = "top", options = list(pageLength = 25,
-                                                       dom = '<"top" if> rt<"bottom"lp>', autoWidth = FALSE), #TODO check adding l worked
+                                                       dom = '<"top" ipf> rt<"bottom"lp>', autoWidth = FALSE), #TODO check adding l worked
                     style = "bootstrap", rownames = FALSE,
                     escape = FALSE) #Add escape = False to ensure the HTML clicks work properly
     })
