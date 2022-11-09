@@ -114,7 +114,9 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                                           shinycssloaders::withSpinner(plotly::plotlyOutput("umapPlot", height = 600)),
                                                           div(id = "button",
                                                               shiny::fluidRow(
-                                                                shiny::actionButton("delete", "Delete selections", class = 'btn-warning', style = "position: absolute; bottom 7px; right: 7px; background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;")),
+                                                                shiny::uiOutput("deleteme"),
+                                                                # shiny::actionButton("delete", "Delete selections", class = 'btn-warning', style = "position: absolute; bottom 7px; right: 7px; background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;")
+                                                              ),
                                                           ),
                                                           shiny::br(),
                                                           shiny::br(),
@@ -132,8 +134,9 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                                         shiny::column(5, shinycssloaders::withSpinner(DT::dataTableOutput("highlightedTable"))),
                                       ),),
                       #---- Distribution Tab ----
-                      shiny::tabPanel("Distribution Plots", shiny::fluidPage(theme = shinythemes::shinytheme('cosmo')),
-                                      gotop::use_gotop(),
+                      shiny::tabPanel("Distribution Plots", shiny::fluidPage(theme = shinythemes::shinytheme('cosmo'),
+                                                                             gotop::use_gotop()),
+
                                       shiny::p("In this tab you can view, and download if necessary, charts designed to help you understand your selections."),
                                       shiny::p("Below you will find four charts; sentiment distribution, volume over time, tokens counter and a sampled bigram network."),
                                       #---- Sentiment plot ----
@@ -209,8 +212,9 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                       ),
                       shiny::br(),
                       #---- Bigram Tab ----
-                      shiny::tabPanel("Bigram Network", shiny::fluidPage(theme = shinythemes::shinytheme('cosmo')),
-                                      gotop::use_gotop(),
+                      shiny::tabPanel("Bigram Network", shiny::fluidPage(theme = shinythemes::shinytheme('cosmo'),
+                                                                         gotop::use_gotop()),
+
                                       shiny::br(),
                                       # Bigram plot ----
 
@@ -320,7 +324,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
                       `Colour Variable` = colour_var, ..., !!sentiment_sym)
 
       DT::datatable(df, filter = "top", options = list(pageLength = 25,
-                                                       dom = '<"top" ipf> rt<"bottom"lp>', autoWidth = FALSE), #TODO check adding l worked
+                                                       dom = '<"top" ifp> rt<"bottom"lp>', autoWidth = FALSE), #TODO check adding l worked
                     style = "bootstrap", rownames = FALSE,
                     escape = FALSE) #Add escape = False to ensure the HTML clicks work properly
     })
@@ -415,19 +419,31 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
     })
 
     #Render UI plot controls ----
-    output$smoothControls <- renderUI({
+
+
+    output$smoothControls <- shiny::renderUI({
       if(input$dateSmooth != "none"){
-        tagList(
-          selectInput("smoothSe", "show standard error?", choices = c("TRUE", "FALSE"), selected = "TRUE"),
-          textInput("smoothColour", "Smooth colour", value ="#000000")
+        shiny::tagList(
+          shiny::selectInput("smoothSe", "show standard error?", choices = c("TRUE", "FALSE"), selected = "TRUE"),
+          shiny::textInput("smoothColour", "Smooth colour", value ="#000000")
         )
       }
 
     })
 
-    output$volumeTitles <- renderUI({
+    #Make delete button disappear when nothing selected
+    output$deleteme <- shiny::renderUI({
+      if(length(selected_range() > 1)){
+        shiny::tagList(
+          shiny::actionButton("delete", "Delete selections", class = 'btn-warning', style = "position: absolute; bottom 7px; right: 7px; background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;")
+        )
+
+      }
+    })
+
+    output$volumeTitles <- shiny::renderUI({
       if(input$toggleVolumetitles == "TRUE"){
-        tagList(
+        shiny::tagList(
           shiny::textInput(inputId = "volumeTitle", label = "Title",
                            placeholder = "Write title here...", value = ""),
           shiny::textInput(inputId = "volumeSubtitle", label = "Subtitle",
@@ -442,9 +458,9 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
       }
     })
 
-    output$sentimentTitles <- renderUI({
+    output$sentimentTitles <- shiny::renderUI({
       if(input$toggleSentimenttitles == "TRUE"){
-        tagList(
+        shiny::tagList(
           shiny::textInput(inputId = "sentimentTitle", label = "Title",
                            placeholder = "Write title here...", value = ""),
           shiny::textInput(inputId = "sentimentSubtitle", label = "Subtitle",
@@ -459,9 +475,9 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
 
       }
     })
-    output$tokenTitles <- renderUI({
+    output$tokenTitles <- shiny::renderUI({
       if(input$toggleTokentitles == "TRUE"){
-        tagList(
+        shiny::tagList(
           shiny::textInput(inputId = "tokenTitle", label = "Title",
                            placeholder = "Write title here...", value = ""),
           shiny::textInput(inputId = "tokenSubtitle", label = "Subtitle",
@@ -479,7 +495,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
 
     #---- Bigram Plot ----
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
-      output$bigramPlot <- renderPlot({
+      output$bigramPlot <- shiny::renderPlot({
         if(length(selected_range()) > 1){
           if(!length(selected_range()) >= 5000){
             bigram <- df_filtered %>%
