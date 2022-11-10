@@ -388,7 +388,7 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$volumePlot <- shiny::renderPlot({
 
-        vol_data <- data %>%
+        vol_data <- df_filtered %>%
           dplyr::filter(date >= input$dateRange[[1]], date <= input$dateRange[[2]])
 
         vol_plot <- vol_data %>%
