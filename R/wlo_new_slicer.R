@@ -10,7 +10,7 @@
 #' @return list with viz and view objects
 #' @export
 #'
-my_wlos_slice <- function(df, topic_var, text_var = Message, top_n = 30, nrow = 4,
+my_wlos_slice <- function(df, topic_var, text_var, top_n = 30, nrow = 4,
                           top_terms_cutoff = 1500){
 
   text_var <- rlang::enquo(text_var)

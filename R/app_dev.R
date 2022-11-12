@@ -20,16 +20,24 @@
 #' @return A shiny application
 #' @export
 #'
-conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_text_var, date_var, sentiment_var,
+conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_text_var, date_var, sentiment_var,
                                    size = 2, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
 
-  #Modified version of vol plot ----
+
   library(htmltools)
   library(tableHTML)
   library(shinyWidgets)
-  .plot_volume_over_time <- function(df, date_var , unit = "week",  fill = "#0f50d2"){
 
-    date_sym <- rlang::ensym(date_var)
+  #----- hide wrangling ----
+  text_sym <- rlang::ensym(text_var)
+  colour_sym <- rlang::ensym(colour_var)
+  date_sym <- rlang::ensym(date_var)
+  sentiment_sym <- rlang::ensym(sentiment_var)
+  cleaned_text_sym <- rlang::ensym(cleaned_text_var)
+  id_sym <- rlang::ensym(id)
+
+  #Modified version of vol plot ----
+  .plot_volume_over_time <- function(df, date_var , unit = "week",  fill = "#0f50d2"){
 
     df <- df %>% dplyr::mutate(plot_date = lubridate::floor_date(!!date_sym, unit = unit))
 
@@ -64,13 +72,6 @@ conversation_landscape <- function(data,..., id,text_var,colour_var, cleaned_tex
   plotting_heights <- "450px"
   plotting_widths <- "400px"
 
-  #----- hide wrangling ----
-  text_sym <- rlang::ensym(text_var)
-  colour_sym <- rlang::ensym(colour_var)
-  date_sym <- rlang::ensym(date_var)
-  sentiment_sym <- rlang::ensym(sentiment_var)
-  cleaned_text_sym <- rlang::ensym(cleaned_text_var)
-  # id_sym <- rlang::ensym(id_var)
 
   #Get date ranges for volume
   dates <- data %>% select(!!date_sym) %>% summarise(min = min(!!date_sym), max = max(!!date_sym))

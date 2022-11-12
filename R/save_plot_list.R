@@ -7,7 +7,7 @@
 #' @param dpi Resolution of saved image - higher number = higher quality
 #' @param width Plot width in specified units
 #' @param height Plot width in specified units
-#' @param units
+#' @param units the appropriate unit of measurement for plot dimensions
 #'
 #' @return does not return anything - saves plots to working directory
 #' @export
