@@ -24,7 +24,7 @@ save_plot_list(
 
 \item{height}{Plot width in specified units}
 
-\item{units}{}
+\item{units}{the appropriate unit of measurement for plot dimensions}
 }
 \value{
 does not return anything - saves plots to working directory

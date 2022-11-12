@@ -278,7 +278,7 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
         dplyr::filter(V1 > input$x1[[1]], V1 < input$x1[[2]], V2 > input$y1[[1]], V2 < input$y1[[2]]) %>%
         dplyr::filter(!colour_var %in% input$cluster,
                       id_var %in% remove_range$keep_keys) %>%
-        dplyr::filter(grepl(input$filterPattern, text_var, ignore.case = TRUE))
+        dplyr::filter(grepl(input$filterPattern, !!text_sym, ignore.case = TRUE))
     })
 
     #--- UMAP Plot ----
@@ -291,7 +291,7 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
                         colors = colour_mapping,
                         key = ~id_var,
                         #make sure mention_content = text variable of your data
-                        text = ~paste("<br> Post:", text_var),
+                        text = ~paste("<br> Post:",text_var),
                         hoverinfo = "text", marker = list(size = size), height = 600) %>%
         plotly::layout(dragmode = "lasso",
                        legend= list(itemsizing='constant')) %>%
@@ -321,7 +321,7 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
 
       df <- df_filtered %>%
         #Select the columns you want to see from your data
-        dplyr::select(`Text` = text_var,
+        dplyr::select(!!text_sym,
                       `Colour Variable` = colour_var, ..., !!sentiment_sym)
 
       DT::datatable(df, filter = "top", options = list(pageLength = 25,
