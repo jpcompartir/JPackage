@@ -3,14 +3,14 @@
 #' @param df Data frame or tibble
 #' @param group_var grouping variable e.g. country, cluster, topic etc.
 #' @param date_var Variable which contains date information (can be datetime too I think)
-#' @param unit Time unit fed into lubridate::floor_date e.g. "week", "day", "month", "second", "quarter", "year"
+#' @param unit A single unit of time fed into lubridate::floor_date  "week", "day", "month","quarter", "year"
 #' @param nrow How many rows the plot should be shown in
 #'
 #' @return ggplot object of facetted bar charts
 #' @export
-plot_group_vol_time <- function(df, group_var = group, date_var = date, unit = "week", nrow = 2){
+plot_group_vol_time <- function(df, group_var = group, date_var = date, unit = c("day", "week", "month", "quarter", "year"), nrow = 2){
 
-
+  unit <- match.arg(unit)
 
   date_sym <- rlang::ensym(date_var)
   group_sym <- rlang::ensym(group_var)

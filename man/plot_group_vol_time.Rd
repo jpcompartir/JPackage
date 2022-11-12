@@ -8,7 +8,7 @@ plot_group_vol_time(
   df,
   group_var = group,
   date_var = date,
-  unit = "week",
+  unit = c("day", "week", "month", "quarter", "year"),
   nrow = 2
 )
 }
@@ -19,7 +19,7 @@ plot_group_vol_time(
 
 \item{date_var}{Variable which contains date information (can be datetime too I think)}
 
-\item{unit}{Time unit fed into lubridate::floor_date e.g. "week", "day", "month", "second", "quarter", "year"}
+\item{unit}{A single unit of time fed into lubridate::floor_date  "week", "day", "month","quarter", "year"}
 
 \item{nrow}{How many rows the plot should be shown in}
 }

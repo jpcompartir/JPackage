@@ -13,7 +13,7 @@
 #' Example 1:
 #' old_names <- paste0("topic_", 1:2)
 #' new_names <- c("New Topic 1", "New Topic 2")
-#' df %>% (topic_var = name, old_names = old_names, new_names = new_names)
+#' df %>% topics_rename(topic_var = name, old_names = old_names, new_names = new_names)
 #'
 #' }
 topics_rename <- function(df, topic_var, old_names, new_names){

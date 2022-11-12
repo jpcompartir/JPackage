@@ -26,7 +26,7 @@ Rename a list of topics to a new list and set the variable as a factor with new 
 Example 1:
 old_names <- paste0("topic_", 1:2)
 new_names <- c("New Topic 1", "New Topic 2")
-df \%>\% (topic_var = name, old_names = old_names, new_names = new_names)
+df \%>\% topics_rename(topic_var = name, old_names = old_names, new_names = new_names)
 
 }
 }

@@ -7,7 +7,7 @@
 my_wlos_slice(
   df,
   topic_var,
-  text_var = Message,
+  text_var,
   top_n = 30,
   nrow = 4,
   top_terms_cutoff = 1500
