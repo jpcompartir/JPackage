@@ -4,7 +4,14 @@
 \alias{spam_grams}
 \title{Remove posts with suspicious n-grams}
 \usage{
-spam_grams(data, text_var, n_gram = 4, top_n = 250, min_freq = 20)
+spam_grams(
+  data,
+  text_var,
+  n_gram = 8,
+  top_n = 1000,
+  min_freq = 5,
+  in_parallel = TRUE
+)
 }
 \arguments{
 \item{data}{Data frame or tibble object}
@@ -16,6 +23,8 @@ spam_grams(data, text_var, n_gram = 4, top_n = 250, min_freq = 20)
 \item{top_n}{Number of n-grams to keep}
 
 \item{min_freq}{Minimum number of}
+
+\item{in_parallel}{Whether to run the function with parallel processing}
 }
 \value{
 A list with the suspicious-looking ngrams, removed posts, data & regex pattern
