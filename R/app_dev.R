@@ -36,7 +36,8 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
   cleaned_text_sym <- rlang::ensym(cleaned_text_var)
   id_sym <- rlang::ensym(id)
 
-  #Modified version of vol plot ----
+
+  # Volume_time plot function ----
   .plot_volume_over_time <- function(df, date_var , unit = "week",  fill = "#0f50d2"){
 
     df <- df %>% dplyr::mutate(plot_date = lubridate::floor_date(!!date_sym, unit = unit))
@@ -53,7 +54,7 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
 
   }
 
-  #Modified version of token plots
+  # Token plot function ----
   .plot_tokens_counter <- function(df, text_var = .data$mention_content, top_n = 20, fill = "#0f50d2"){
 
     .text_var <- rlang::enquo(text_var)
@@ -69,6 +70,43 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
       ggplot2::theme(plot.title = element_text(hjust = 0.5, face = "bold"))
   }
 
+  #Download box function ----
+  download_box <- function(exportname, plot) {
+    shiny::downloadHandler(
+      filename = function() {
+        paste(exportname, Sys.Date(), ".png", sep = "")
+      },
+      content = function(file) {
+        ggplot2::ggsave(file, plot = plot, device = "png", width = 8)
+      }
+    )
+  }
+
+  #Render titles function ----
+  .titles_render <- function(plot_type){
+
+    .plot_type <- stringr::str_to_title(plot_type)
+
+    shiny::renderUI({
+      if(eval(parse(text = paste0("input$toggle", .plot_type, "titles"))) == "TRUE"){
+        shiny::tagList(
+          shiny::textInput(inputId = paste0(plot_type, "Title"), label = "Title",
+                           placeholder = "Write title here...", value = ""),
+          shiny::textInput(inputId = paste0(plot_type, "Subtitle"), label = "Subtitle",
+                           placeholder = "Write subtitle here...", value = ""),
+          shiny::textInput(inputId = paste0(plot_type, "Caption"), label = "Caption",
+                           placeholder = "Write caption here...", value = ""),
+          shiny::textInput(inputId = paste0(plot_type, "Xlabel"), label = "X axis title",
+                           placeholder = "Write the x axis title here..."),
+          shiny::textInput(inputId = paste0(plot_type, "Ylabel"), label = "Y axis title",
+                           placeholder = "Write the y axis title here")
+        )
+      }
+    })
+
+
+  }
+
   plotting_heights <- "450px"
   plotting_widths <- "400px"
 
@@ -81,7 +119,7 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
   data <- dplyr::rename(data, id_var = {{id}})
   data <- dplyr::relocate(data, {{x_var}},{{y_var}}, {{text_var}}, {{colour_var}}, id_var)
   #Rename columns to avoid relying on tidy evaluate in server logic
-  data <- dplyr::rename(data, text_var = 3, colour_var = 4)
+  data <- dplyr::rename(data, text_var = 3, colour_var = 4, V1 = {{x_var}}, V2 = {{y_var}})
 
   # hide UI ----
   ui <-
@@ -443,30 +481,6 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
     })
 
     #---- Render Titles ----
-    .titles_render <- function(plot_type){
-
-      .plot_type <- stringr::str_to_title(plot_type)
-
-      shiny::renderUI({
-        if(eval(parse(text = paste0("input$toggle", .plot_type, "titles"))) == "TRUE"){
-          shiny::tagList(
-            shiny::textInput(inputId = paste0(plot_type, "Title"), label = "Title",
-                             placeholder = "Write title here...", value = ""),
-            shiny::textInput(inputId = paste0(plot_type, "Subtitle"), label = "Subtitle",
-                             placeholder = "Write subtitle here...", value = ""),
-            shiny::textInput(inputId = paste0(plot_type, "Caption"), label = "Caption",
-                             placeholder = "Write caption here...", value = ""),
-            shiny::textInput(inputId = paste0(plot_type, "Xlabel"), label = "X axis title",
-                             placeholder = "Write the x axis title here..."),
-            shiny::textInput(inputId = paste0(plot_type, "Ylabel"), label = "Y axis title",
-                             placeholder = "Write the y axis title here")
-          )
-        }
-      })
-
-
-    }
-
     output$volumeTitles <- .titles_render("volume")
     output$sentimentTitles <- .titles_render("sentiment")
     output$tokenTitles <- .titles_render("token")
@@ -491,16 +505,7 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
       height = function() input$bigramHeight)
     })
     #---- Download boxes for plots ----
-    download_box <- function(exportname, plot) {
-      shiny::downloadHandler(
-        filename = function() {
-          paste(exportname, Sys.Date(), ".png", sep = "")
-        },
-        content = function(file) {
-          ggplot2::ggsave(file, plot = plot, device = "png", width = 8)
-        }
-      )
-    }
+
     output$saveVolume <- download_box("volume_plot", volume_reactive())
     output$saveToken <- download_box("token_plot", token_reactive())
     output$saveSentiment <- download_box("sentiment_plot", sentiment_reactive())
