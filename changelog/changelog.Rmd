@@ -11,12 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 JPackage changelog - starting from Wednesday 16th November, 2022
 
 # TODO
-conversation_landscape - deserves its own Rmd lol. UI changes, plotting changes 
+conversation_landscape - deserves its own Rmd lol. UI changes, plotting changes etc. TODO: update this
 Functions to move to Intelligence Suite
 Spam grams - parallelised version --> LimpiaR?
 make_top_terms_table --> ParseR
 plot_top_terms --> ParseR
-plot_group_term_network --> ParseR and maybe explore_LDAs (SegmentR)
+plot_group_term_network --> ParseR and maybe SegmentR
+plot_group_wlos_networlk --> ParseR and maybe SegmentR
 wlo_new_slicer --> ParseR and maybe explore_LDAs
 plot_group_sentiment --> ParseR/HelpR
 plot_group_bigrams --> ParseR/nowhere/HelpR
@@ -32,3 +33,40 @@ explore_LDAs_lollipop --> SegmentR. Changes committed/maybe PR submitted?
 
 # Complete
 Added render_titles to avoid duplication in rendered UI function -- Thu 17 Nov 11:36
+
+Rename x_var and y_var with {{}} for plotly purposes (may want to revise this later)
+
+Up to 17th Nov
+Colours of factors/categories - DONE
+Placing of ellipsis/extra columns or move to c()
+Relocate delete sections button - DONE
+Download all button - DONE
+Move download selection button - DONE
+Add step to sliders - DONE
+Permalink column with clickable link - DONE
+Pattern updating + reset button - DONE
+Filtering by pattern - this should probably have an action button - DONE
+Navbar always present at top - DONE
+Reactive Plots - DONE
+Tabs for plotting stuff and cluster/selection-cleanliness assessment - tabs are set up - DONE
+plot title, subtitle, caption, width, height - DONE
+Explanatory text/html (some done)
+Spinners on plots and UI outputs while waiting - DONE
+- plot_volume_over_time date breaks - DONE
+- geom_smooth for volume - probably want this to be a renderUI rendering after a checkbox input with se TRUE/FALSE and colour - DONE
+- Switch titles to renderUI and selectInput for space - DONE
+- Adding waiters - DONE
+- Allow for time filtering i.e. slider date ranges allowing user to select the timeframe they want to zoom in on - Added to Volume plot, could extend to others I suppose (Probably should)
+- Calculate Ngrams just once and filter - DONE  not worth as sampling maybe
+When and how plots should be rendered (as some may end up being costly computationally)
+  - Button click X OPTED AGAINST
+  - Tab change DONE
+  - Whenever reactive_data is updated  DONE
+  - Via a checkbox group input? DONE
+  - Volume, sentiment, tokens, bigrams DONE
+- Bigram networks are a good tool for assessing cleanliness but the function is costly - solution = sample - DONE
+- CSS and HTML custom arrangements - buttons, graph + DT, sliders, delete button - DONE (but needs prof. input)
+- JS checkboxes - DONE
+- Render titles functionised - DONE
+- TidyEvaluate for x_var and y_var - DONE
+

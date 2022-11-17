@@ -83,29 +83,6 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
   }
 
   #Render titles function ----
-  .titles_render <- function(plot_type){
-
-    .plot_type <- stringr::str_to_title(plot_type)
-
-    shiny::renderUI({
-      if(eval(parse(text = paste0("input$toggle", .plot_type, "titles"))) == "TRUE"){
-        shiny::tagList(
-          shiny::textInput(inputId = paste0(plot_type, "Title"), label = "Title",
-                           placeholder = "Write title here...", value = ""),
-          shiny::textInput(inputId = paste0(plot_type, "Subtitle"), label = "Subtitle",
-                           placeholder = "Write subtitle here...", value = ""),
-          shiny::textInput(inputId = paste0(plot_type, "Caption"), label = "Caption",
-                           placeholder = "Write caption here...", value = ""),
-          shiny::textInput(inputId = paste0(plot_type, "Xlabel"), label = "X axis title",
-                           placeholder = "Write the x axis title here..."),
-          shiny::textInput(inputId = paste0(plot_type, "Ylabel"), label = "Y axis title",
-                           placeholder = "Write the y axis title here")
-        )
-      }
-    })
-
-
-  }
 
   plotting_heights <- "450px"
   plotting_widths <- "400px"
@@ -481,6 +458,29 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
     })
 
     #---- Render Titles ----
+    .titles_render <- function(plot_type){
+
+      .plot_type <- stringr::str_to_title(plot_type)
+
+      shiny::renderUI({
+        if(eval(parse(text = paste0("input$toggle", .plot_type, "titles"))) == "TRUE"){
+          shiny::tagList(
+            shiny::textInput(inputId = paste0(plot_type, "Title"), label = "Title",
+                             placeholder = "Write title here...", value = ""),
+            shiny::textInput(inputId = paste0(plot_type, "Subtitle"), label = "Subtitle",
+                             placeholder = "Write subtitle here...", value = ""),
+            shiny::textInput(inputId = paste0(plot_type, "Caption"), label = "Caption",
+                             placeholder = "Write caption here...", value = ""),
+            shiny::textInput(inputId = paste0(plot_type, "Xlabel"), label = "X axis title",
+                             placeholder = "Write the x axis title here..."),
+            shiny::textInput(inputId = paste0(plot_type, "Ylabel"), label = "Y axis title",
+                             placeholder = "Write the y axis title here")
+          )
+        }
+      })
+
+
+    }
     output$volumeTitles <- .titles_render("volume")
     output$sentimentTitles <- .titles_render("sentiment")
     output$tokenTitles <- .titles_render("token")
