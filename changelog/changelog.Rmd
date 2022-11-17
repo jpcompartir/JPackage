@@ -1,0 +1,34 @@
+---
+title: "changelog"
+output: html_document
+date: '2022-11-16'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+JPackage changelog - starting from Wednesday 16th November, 2022
+
+# TODO
+conversation_landscape - deserves its own Rmd lol. UI changes, plotting changes 
+Functions to move to Intelligence Suite
+Spam grams - parallelised version --> LimpiaR?
+make_top_terms_table --> ParseR
+plot_top_terms --> ParseR
+plot_group_term_network --> ParseR and maybe explore_LDAs (SegmentR)
+wlo_new_slicer --> ParseR and maybe explore_LDAs
+plot_group_sentiment --> ParseR/HelpR
+plot_group_bigrams --> ParseR/nowhere/HelpR
+plot_group_vol_time --> HelpR
+plot_group_sent_time --> HelpR (this isn't presently stored in JPackage but does exist)
+sample_pull --> LimpiaR(?)/nowhere
+topics_rename --> SegmentR
+huggingface_quick_clean --> HelpR (maybe, or nowhere)
+
+# In Progress
+make_DTMs_parallel --> SegmentR. Changes committed/aybe PR submitted? (no internet rn to chceck)
+explore_LDAs_lollipop --> SegmentR. Changes committed/maybe PR submitted?
+
+# Complete
+Added render_titles to avoid duplication in rendered UI function -- Thu 17 Nov 11:36

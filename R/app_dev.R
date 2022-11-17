@@ -89,8 +89,8 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
                       tags$style(type="text/css", "body {padding-top: 70px;}"), #Prevents the navbar from eating body of app
                       #colours all 10  sliders orange
                       shinyWidgets::setSliderColor(color = rep("#ff7518", 10), sliderId = c(1:10)),
+                      #---- Landscape Tab----
                       shiny::tabPanel("Survey the Landscape",
-                                      #---- Landscape Tab----
                                       shiny::fluidPage(
                                         gotop::use_gotop(),
                                         # shinythemes::themeSelector(),
@@ -240,14 +240,14 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
   #---- Server ----
   server <- function(input, output, session){
 
-    #--- Pattern ----
+    #---- Pattern ----
     pattern <- shiny::reactiveVal(value = "",{})
 
     shiny::observeEvent(input$filterPattern, {
       pattern(input$Regex)
     })
 
-    #--- Filter + Reset Pattern ----
+    #---- Filter + Reset Pattern ----
     shiny::observeEvent(input$reset, {
       pattern(input$Regex)
       updateTextInput(session, "Regex", value = "")
@@ -257,7 +257,7 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
       pattern("")
     })
 
-    #--- Delete IDS ----
+    #---- Delete IDS ----
     #Get the original IDs saved and save an object for later adding selected points to remove
     remove_range <- shiny::reactiveValues(
       keep_keys = data$id_var,
@@ -281,7 +281,7 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
         dplyr::filter(grepl(input$filterPattern, !!text_sym, ignore.case = TRUE))
     })
 
-    #--- UMAP Plot ----
+    #---- UMAP Plot ----
     output$umapPlot = plotly::renderPlotly({
       #cluster can be changed
       reactive_data() %>%
@@ -306,7 +306,7 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
     })
 
 
-    #--- Data Table ----
+    #---- Data Table ----
     #Now render the data table, selecting all points within our boundaries. Would need to update this for lasso selection.,
     output$highlightedTable <- DT::renderDataTable({
 
@@ -330,7 +330,7 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
                     escape = FALSE) #Add escape = False to ensure the HTML clicks work properly
     })
 
-    #--- Download Handler Data ----
+    #---- Download Handler Data ----
     output$downloadData <- shiny::downloadHandler(
       filename = function() {
         paste0(input$fileName, ".csv")
@@ -354,7 +354,7 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
     }) %>%
       shiny::debounce(2000)
 
-    #--- Reactive plots + Observes ----
+    #---- Reactive plots + Observes ----
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
       output$sentimentPlot <- shiny::renderPlot({
         df_filtered %>%
@@ -419,7 +419,7 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
       height = function() input$volumeHeight)
     })
 
-    #Render UI plot controls ----
+    #---- Render UI plot controls ----
 
 
     output$smoothControls <- shiny::renderUI({
@@ -442,57 +442,34 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
       }
     })
 
-    output$volumeTitles <- shiny::renderUI({
-      if(input$toggleVolumetitles == "TRUE"){
-        shiny::tagList(
-          shiny::textInput(inputId = "volumeTitle", label = "Title",
-                           placeholder = "Write title here...", value = ""),
-          shiny::textInput(inputId = "volumeSubtitle", label = "Subtitle",
-                           placeholder = "Write subtitle here...", value = ""),
-          shiny::textInput(inputId = "volumeCaption", label = "Caption",
-                           placeholder = "Write caption here...", value = ""),
-          shiny::textInput(inputId = "volumeXlabel", label = "X axis title",
-                           placeholder = "Write the x axis title here..."),
-          shiny::textInput(inputId = "volumeYlabel", label = "Y axis title",
-                           placeholder = "Write the y axis title here")
-        )
-      }
-    })
+    #---- Render Titles ----
+    .titles_render <- function(plot_type){
 
-    output$sentimentTitles <- shiny::renderUI({
-      if(input$toggleSentimenttitles == "TRUE"){
-        shiny::tagList(
-          shiny::textInput(inputId = "sentimentTitle", label = "Title",
-                           placeholder = "Write title here...", value = ""),
-          shiny::textInput(inputId = "sentimentSubtitle", label = "Subtitle",
-                           placeholder = "Write subtitle here...", value = ""),
-          shiny::textInput(inputId = "sentimentCaption", label = "Caption",
-                           placeholder = "Write caption here...", value = ""),
-          shiny::textInput(inputId = "sentimentXlabel", label = "X axis title",
-                           placeholder = "Write the x axis title here..."),
-          shiny::textInput(inputId = "sentimentYlabel", label = "Y axis title",
-                           placeholder = "Write the y axis title here"),
-        )
+      .plot_type <- stringr::str_to_title(plot_type)
 
-      }
-    })
-    output$tokenTitles <- shiny::renderUI({
-      if(input$toggleTokentitles == "TRUE"){
-        shiny::tagList(
-          shiny::textInput(inputId = "tokenTitle", label = "Title",
-                           placeholder = "Write title here...", value = ""),
-          shiny::textInput(inputId = "tokenSubtitle", label = "Subtitle",
-                           placeholder = "Write subtitle here...", value = ""),
-          shiny::textInput(inputId = "tokenCaption", label = "Caption",
-                           placeholder = "Write caption here...", value = ""),
-          shiny::textInput(inputId = "tokenXlabel", label = "X axis title",
-                           placeholder = "Write the x axis title here..."),
-          shiny::textInput(inputId = "tokenYlabel", label = "Y axis title",
-                           placeholder = "Write the y axis title here"),
-        )
+      shiny::renderUI({
+        if(eval(parse(text = paste0("input$toggle", .plot_type, "titles"))) == "TRUE"){
+          shiny::tagList(
+            shiny::textInput(inputId = paste0(plot_type, "Title"), label = "Title",
+                             placeholder = "Write title here...", value = ""),
+            shiny::textInput(inputId = paste0(plot_type, "Subtitle"), label = "Subtitle",
+                             placeholder = "Write subtitle here...", value = ""),
+            shiny::textInput(inputId = paste0(plot_type, "Caption"), label = "Caption",
+                             placeholder = "Write caption here...", value = ""),
+            shiny::textInput(inputId = paste0(plot_type, "Xlabel"), label = "X axis title",
+                             placeholder = "Write the x axis title here..."),
+            shiny::textInput(inputId = paste0(plot_type, "Ylabel"), label = "Y axis title",
+                             placeholder = "Write the y axis title here")
+          )
+        }
+      })
 
-      }
-    })
+
+    }
+
+    output$volumeTitles <- .titles_render("volume")
+    output$sentimentTitles <- .titles_render("sentiment")
+    output$tokenTitles <- .titles_render("token")
 
     #---- Bigram Plot ----
     shiny::observeEvent(plotly::event_data("plotly_selected"),{
