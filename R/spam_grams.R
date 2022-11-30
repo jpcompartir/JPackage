@@ -14,69 +14,75 @@
 #' @return A list with the suspicious-looking ngrams, removed posts, data & regex pattern
 #' @export
 #'
-
 spam_grams <- function(data, text_var, n_gram = 8, top_n = 1000, min_freq = 5, in_parallel = TRUE){
 
+  #Tidy evaluate supplied text variable (symbol as column in data)
+  text_sym <- rlang::ensym(text_var)
+
+  grams <- df  %>%
+    dplyr::mutate(document = dplyr::row_number()) %>%
+    dplyr::select(document,{{text_var}}) %>%
+    tidytext::unnest_tokens(ngrams, !!text_sym, token = "ngrams", format = "text", n = 6) %>%
+    dplyr::add_count(ngrams, name = "n_ngram")
+
+  grams <- grams %>%
+    dplyr::add_count(document, ngrams, name = "n_doc_gram") %>%
+    dplyr::add_count(document, name = "n_doc")
+
+  grams <- grams %>%
+    dplyr::filter(n_ngram > min_freq)
+
+  grams <- grams %>%
+    dplyr::filter(!is.na(ngrams)) %>%
+    dplyr::group_split(document) %>%
+    purrr::map(~ .x %>%
+          dplyr::mutate(x = nrow(.x),
+                 n_samples = ifelse(x > 5, 5, x)) %>%
+          dplyr:: sample_n(size = max(n_samples))) %>%
+    purrr::reduce(rbind)
+
+  message("Unnesting ngrams finished")
+
+  regex <- paste0(grams$ngrams, collapse = "|")
+
   if(!in_parallel){
-    grams <- data %>%
-      tidytext::unnest_tokens(ngram, {{text_var}}, token = "ngrams",
-                              n = n_gram, format = "text")%>%
-      dplyr::count(ngram, name = "count")%>%
-      dplyr::slice_max(n = top_n, order_by = count) %>%
-      dplyr::filter(count >= min_freq)
-
-    message("Unnesting ngrams finished")
-
-    regex <- paste0(grams$ngram, collapse = "|")
 
     message("Removing spam regex from data")
-
     removed <- data %>% dplyr::filter(stringr::str_detect({{text_var}}, regex))%>%
       dplyr::select({{text_var}})
 
     data <- data %>% dplyr::filter(!stringr::str_detect({{text_var}}, regex))
 
     return(list(grams, removed, data, regex))
+
+  } else{
+
+    options(future.rng.onMisuse = "ignore")
+    future::plan(future::multisession(workers = future::availableCores() -1))
+
+    data <- data %>%
+      dplyr::mutate(.row_id = dplyr::row_number(),
+                    cuts = cut(.row_id, future::availableCores() - 1))
+
+    #Parallelise the string removals as this is the costly part
+    message("Removing spam regex from data")
+    removed <- data %>%
+      dplyr::group_split(cuts) %>%
+      furrr::future_map_dfr(~ .x %>%
+                              dplyr::filter(stringr::str_detect(!!text_sym, regex)) %>%
+                              dplyr::select(!!text_sym, .row_id))
+
+    future::plan(future::sequential())
+    message("Ending parallel session")
+
+    data <- data %>% dplyr::filter(!.row_id %in% removed$.row_id) %>%
+      dplyr::select(-c(.row_id, cuts))
+
+    removed <- dplyr::select(removed, -.row_id)
+
+
+    return(list(grams,removed,data,regex))
   }
 
-  options(future.rng.onMisuse = "ignore")
-  future::plan(future::multisession(workers = future::availableCores() -1))
 
-  text_sym <- rlang::ensym(text_var)
-
-  data <- data %>%
-    dplyr::mutate(.row_id = dplyr::row_number(),
-                  cuts = cut(.row_id, future::availableCores() - 1))
-
-  #Note to self - no use parallelising this as it's so fast - actually slows us down.
-  grams <- data %>%
-    tidytext::unnest_tokens(ngram, {{text_var}}, token = "ngrams",
-                            n = n_gram, format = "text")%>%
-    dplyr::count(ngram, name = "count")%>%
-    dplyr::slice_max(n = top_n, order_by = count) %>%
-    dplyr::filter(count >= min_freq)
-
-  message("Unnesting ngrams finished")
-
-  regex <- grams$ngram
-  regex <- paste0(regex, collapse = "|")
-
-  message("Removing spam regex from data")
-  removed <- data %>%
-    dplyr::group_split(cuts) %>%
-    furrr::future_map_dfr(~ .x %>%
-                            dplyr::filter(stringr::str_detect(!!text_sym, regex)) %>%
-                            dplyr::select(!!text_sym, .row_id))
-
-  future::plan(future::sequential())
-  message("Ending parallel session")
-
-  data <- data %>% dplyr::filter(!.row_id %in% removed$.row_id) %>%
-    dplyr::select(-c(.row_id, cuts))
-
-  removed <- dplyr::select(removed, -.row_id)
-
-  list(grams,removed,data,regex)
 }
-
-

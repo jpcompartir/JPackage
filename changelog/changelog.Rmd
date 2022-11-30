@@ -32,9 +32,6 @@ make_DTMs_parallel --> SegmentR. Changes committed/aybe PR submitted? (no intern
 explore_LDAs_lollipop --> SegmentR. Changes committed/maybe PR submitted?
 
 # Complete
-Added render_titles to avoid duplication in rendered UI function -- Thu 17 Nov 11:36
-
-Rename x_var and y_var with {{}} for plotly purposes (may want to revise this later)
 
 Up to 17th Nov
 Colours of factors/categories - DONE
@@ -70,3 +67,6 @@ When and how plots should be rendered (as some may end up being costly computati
 - Render titles functionised - DONE
 - TidyEvaluate for x_var and y_var - DONE
 
+Added render_titles to avoid duplication in rendered UI function -- Thu 17 Nov
+
+Rename x_var and y_var with {{}} for plotly purposes (may want to revise this later) -- Thu 17 Nov
