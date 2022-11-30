@@ -2,14 +2,14 @@
 % Please edit documentation in R/plot_group_bigrams.R
 \name{plot_group_bigrams}
 \alias{plot_group_bigrams}
-\title{Make a bigram network for each level of a categorical variable}
+\title{Make a bigram network for each element of a grouping variable}
 \usage{
-plot_group_bigrams(data, cat_var, text_var = mention_content, ...)
+plot_group_bigrams(data, group_var, text_var = mention_content, ...)
 }
 \arguments{
 \item{data}{Data frame or tibble object}
 
-\item{cat_var}{The categorical variable to create plots for}
+\item{group_var}{The categorical variable to create plots for}
 
 \item{text_var}{Name of the text variable}
 
@@ -19,5 +19,5 @@ plot_group_bigrams(data, cat_var, text_var = mention_content, ...)
 list of ggplot2 objects
 }
 \description{
-Make a bigram network for each level of a categorical variable
+Make a bigram network for each element of a grouping variable
 }

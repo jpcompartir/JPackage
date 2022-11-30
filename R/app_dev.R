@@ -20,9 +20,8 @@
 #' @return A shiny application
 #' @export
 #'
-conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_text_var, date_var, sentiment_var,
+conversation_landscape <- function(data,..., id, text_var, colour_var, cleaned_text_var, date_var, sentiment_var,
                                    size = 2, x_var = V1, y_var = V2, type = "scattergl", colour_mapping = NULL){
-
 
   library(htmltools)
   library(tableHTML)
@@ -36,12 +35,13 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
   cleaned_text_sym <- rlang::ensym(cleaned_text_var)
   id_sym <- rlang::ensym(id)
 
+  plotting_heights <- "450px"
+  plotting_widths <- "400px"
 
   # Volume_time plot function ----
   .plot_volume_over_time <- function(df, date_var , unit = "week",  fill = "#0f50d2"){
 
     df <- df %>% dplyr::mutate(plot_date = lubridate::floor_date(!!date_sym, unit = unit))
-
     df %>%
       dplyr::count(plot_date) %>%
       ggplot2::ggplot(ggplot2::aes(x = plot_date, y = n)) +
@@ -50,8 +50,6 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
       ggplot2::scale_x_date(date_breaks = "1 months", date_labels = "%d-%b") +
       ggplot2::theme(legend.position = "none",
                      axis.text.x = element_text(angle = 90))
-
-
   }
 
   # Token plot function ----
@@ -82,12 +80,6 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
     )
   }
 
-  #Render titles function ----
-
-  plotting_heights <- "450px"
-  plotting_widths <- "400px"
-
-
   #Get date ranges for volume
   dates <- data %>% select(!!date_sym) %>% summarise(min = min(!!date_sym), max = max(!!date_sym))
   date_min <- as.Date(dates$min)
@@ -99,8 +91,7 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
   data <- dplyr::rename(data, text_var = 3, colour_var = 4, V1 = {{x_var}}, V2 = {{y_var}})
 
   # hide UI ----
-  ui <-
-    shiny::navbarPage("Conversation Landscape", theme = shinythemes::shinytheme("cosmo"), position = "fixed-top",
+  ui <- shiny::navbarPage("Conversation Landscape", theme = shinythemes::shinytheme("cosmo"), position = "fixed-top",
                       tags$style(type="text/css", "body {padding-top: 70px;}"), #Prevents the navbar from eating body of app
                       #colours all 10  sliders orange
                       shinyWidgets::setSliderColor(color = rep("#ff7518", 10), sliderId = c(1:10)),
@@ -108,7 +99,6 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
                       shiny::tabPanel("Survey the Landscape",
                                       shiny::fluidPage(
                                         gotop::use_gotop(),
-                                        # shinythemes::themeSelector(),
                                         theme = shinythemes::shinytheme(theme = "cosmo"),
                                         shiny::fluidRow(
                                           shiny::column(2, style = "padding-right: 0px; border: none;",  shiny::textInput("remainingName", "All Data", value = NULL, placeholder = "filename")),
@@ -131,7 +121,6 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
                                                           div(id = "button",
                                                               shiny::fluidRow(
                                                                 shiny::uiOutput("deleteme"),
-                                                                # shiny::actionButton("delete", "Delete selections", class = 'btn-warning', style = "position: absolute; bottom 7px; right: 7px; background: #ff4e00; border-radius: 100px; color: #ffffff; border:none;")
                                                               ),
                                                           ),
                                                           shiny::br(),
@@ -233,7 +222,6 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
 
                                       shiny::br(),
                                       # Bigram plot ----
-
                                       shiny::fluidRow(
                                         shiny::column(4,
                                                       shiny::p("Below you'll find a bigram network, this network will help you estimate how clean your selected data is. Remember that long and connected chains of words may represent spam or unwanted mentions."),
@@ -273,14 +261,12 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
     })
 
     #---- Delete IDS ----
-    #Get the original IDs saved and save an object for later adding selected points to remove
     remove_range <- shiny::reactiveValues(
-      keep_keys = data$id_var,
+      keep_keys = data$id_var, #Get the original IDs saved and save an object for later adding selected points to remove
       remove_keys = NULL
     )
 
-    #Update remove_range's values on delete button press
-    shiny::observeEvent(input$delete,{
+    shiny::observeEvent(input$delete,{  #Update remove_range's values on delete button press
       req(length(remove_range$keep_keys) > 0)
       remove_range$remove_keys <- selected_range()$key
       remove_range$keep_keys <- remove_range$keep_keys[!remove_range$keep_keys %in% remove_range$remove_keys]
@@ -293,20 +279,18 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
         dplyr::filter(V1 > input$x1[[1]], V1 < input$x1[[2]], V2 > input$y1[[1]], V2 < input$y1[[2]]) %>%
         dplyr::filter(!colour_var %in% input$cluster,
                       id_var %in% remove_range$keep_keys) %>%
-        dplyr::filter(grepl(input$filterPattern, !!text_sym, ignore.case = TRUE))
+        dplyr::filter(grepl(input$filterPattern, text_var, ignore.case = TRUE))
     })
 
     #---- UMAP Plot ----
     output$umapPlot = plotly::renderPlotly({
-      #cluster can be changed
       reactive_data() %>%
         plotly::plot_ly(x = ~V1, y = ~V2,
                         type = type,
                         color = ~colour_var,
                         colors = colour_mapping,
                         key = ~id_var,
-                        #make sure mention_content = text variable of your data
-                        text = ~paste("<br> Post:",text_var),
+                        text = ~paste("<br> Post:", text_var),
                         hoverinfo = "text", marker = list(size = size), height = 600) %>%
         plotly::layout(dragmode = "lasso",
                        legend= list(itemsizing='constant')) %>%
@@ -327,16 +311,13 @@ conversation_landscape <- function(data,..., id,text_var, colour_var, cleaned_te
 
       #Replacing pointNumber with a key allows for precise showing of points irrespective of variable input type.
       key <- selected_range()$key
-      #Changing to universal_message_id changed the need for this I think?
-      # key <- as.numeric(key)
 
       df_filtered <<- reactive_data() %>%
-        #This was trying to find {{id_var}} which had been changed
-        dplyr::filter(id_var %in% key)
+        dplyr::filter(id_var %in% key) #TODO id_var dangerous(?)
 
       df <- df_filtered %>%
         #Select the columns you want to see from your data
-        dplyr::select(!!text_sym,
+        dplyr::select(text_var,
                       `Colour Variable` = colour_var, ..., !!sentiment_sym)
 
       DT::datatable(df, filter = "top", options = list(pageLength = 25,
