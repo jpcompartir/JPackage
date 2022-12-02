@@ -3,6 +3,7 @@
 export("%>%")
 export(clean_embeds)
 export(clean_entities)
+export(column_type_checker)
 export(context_grabber)
 export(conversation_landscape)
 export(count_multiple)

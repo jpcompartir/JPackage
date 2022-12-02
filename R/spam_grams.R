@@ -19,7 +19,7 @@ spam_grams <- function(data, text_var, n_gram = 8, top_n = 1000, min_freq = 5, i
   #Tidy evaluate supplied text variable (symbol as column in data)
   text_sym <- rlang::ensym(text_var)
 
-  grams <- df  %>%
+  grams <- data  %>%
     dplyr::mutate(document = dplyr::row_number()) %>%
     dplyr::select(document,{{text_var}}) %>%
     tidytext::unnest_tokens(ngrams, !!text_sym, token = "ngrams", format = "text", n = 6) %>%
