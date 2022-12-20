@@ -74,3 +74,6 @@ Rename x_var and y_var with {{}} for plotly purposes (may want to revise this la
 
 28th Nov -
 spam_grams changes, better parallelisation and better selection of spammy n-grams on average
+
+Tue 20th Dec -
+Adding plot_save and folder_setup functions
