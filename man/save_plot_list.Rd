@@ -6,6 +6,7 @@
 \usage{
 save_plot_list(
   plot_list,
+  dir = NULL,
   plot_type = "bigram",
   dpi = 700,
   width = 9,
@@ -15,6 +16,8 @@ save_plot_list(
 }
 \arguments{
 \item{plot_list}{Should be a named list of plots}
+
+\item{dir}{the directory to save plots in (defaults to current working directory)}
 
 \item{plot_type}{For saving prefix that gets pasted with name and .png = e.g. "bigram_microsoft_topic_1.png"}
 
@@ -31,4 +34,13 @@ does not return anything - saves plots to working directory
 }
 \description{
 Set your working directory to the folder you want to save your plots to with \code{setwd("~/foo/bar")} then call the function on your list of plots.
+}
+\examples{
+\dontrun{
+df <- ParseR::sprinklr_export \%>\% janitor::clean_names()
+bigrams_list <- df \%>\% group_split(social_network) \%>\% map(make_bigram_viz, message, .progress = TRUE)
+names(bigrams_list) <- c("1", "2", "3")
+dir.create("test_dir")
+save_plot_lists(plot_list = bigrams_list, dir = "test_dir")
+}
 }
