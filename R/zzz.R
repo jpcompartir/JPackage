@@ -1,3 +1,13 @@
+#' Rough estimate of take-home salary for different patypoints with student loan and pension taken into account.
+#'
+#' @param salary Gross salary
+#' @param pension Contributing to a pension or not? If TRUE then value is 0.05 * taxable income(may edit this to be a prop.)
+#' @param student_loan Repaying a student loan or not? If TRUE then value is 0.05 (may edit this to be a prop.)
+#' @param tax_free_allowance
+#'
+#' @return integer with net pay per year (/12 for monhtly)
+#' @export
+#'
 net_income <- function(salary, pension = TRUE, student_loan = TRUE, tax_free_allowance = 12570){
 
   high_bracket <- 50270
