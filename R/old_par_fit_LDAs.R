@@ -80,7 +80,7 @@ old_par_fit_LDAs <- function(dtms,
     #return
     tibble::tibble(topic, coherence)
   }
-  future:::ClusterRegistry("stop")
+  future::ClusterRegistry("stop")
   #No need to use furrr::future_map2() here as it's unstable and calc is quick.
   lda %>%
     dplyr::mutate(coherence = purrr::map2(.x = dtm,

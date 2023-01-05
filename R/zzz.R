@@ -63,7 +63,9 @@ net_income <- function(salary, pension = TRUE, student_loan = TRUE, tax_free_all
 
   national_insurance <- calculate_ni(salary)
 
-  net_income <- (taxable_income - (income_tax + pension_contribution_annual + student_loan_contribution_annual + national_insurance)) + tax_free_allowance
+  deductions <- income_tax + pension_contribution_annual + student_loan_contribution_annual + national_insurance
+
+  net_income <- (taxable_income -  deductions) + tax_free_allowance
 
   return(net_income)
 }

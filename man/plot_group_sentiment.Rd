@@ -9,7 +9,8 @@ plot_group_sentiment(
   group_var = topic,
   sentiment_var = sentiment,
   type = "percent",
-  title = "Grouped Sentiment Chart"
+  title = "Grouped Sentiment Chart",
+  bar_labels = c("None", "Percent", "Volume")
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ plot_group_sentiment(
 \item{type}{Whether the plot should be of volume or py percentage. Acccepts "percent" or "volume"}
 
 \item{title}{The title of the plot, entered as a string.}
+
+\item{bar_labels}{Whether to add the raw volume, percentage or neither to the bars}
 }
 \value{
 Ggplot stacked bar chart with x and y coords flipped
