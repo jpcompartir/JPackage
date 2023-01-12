@@ -8,9 +8,9 @@ plot_group_sentiment(
   df,
   group_var = topic,
   sentiment_var = sentiment,
-  type = "percent",
+  type = c("percent", "volume"),
   title = "Grouped Sentiment Chart",
-  bar_labels = c("None", "Percent", "Volume")
+  bar_labels = c("none", "percent", "volume")
 )
 }
 \arguments{
@@ -20,7 +20,7 @@ plot_group_sentiment(
 
 \item{sentiment_var}{Sentiment variable (categorical)}
 
-\item{type}{Whether the plot should be of volume or py percentage. Acccepts "percent" or "volume"}
+\item{type}{Whether the plot should be of volume or py percentage. Accepts "percent" or "volume"}
 
 \item{title}{The title of the plot, entered as a string.}
 
@@ -34,10 +34,10 @@ Quickly plot group sentiment distributions as a perentage
 }
 \examples{
 \dontrun{
-Example 1:
+# Example 1:
 plot_group_sentiment(df, group_var = platform, sentiment_var = sentiment, type = "percent")
 
-Example 2:
+# Example 2:
 plot_group_sentiment(df, group_var = topic, sentiment_var = sentiment, type = "volume")
 }
 }
