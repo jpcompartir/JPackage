@@ -59,19 +59,19 @@ plot_group_sentiment <- function(df,
     ggplot2::scale_x_discrete(expand = c(0, 0)) +
     ggplot2::scale_y_discrete(expand = c(0, 0))
 
-  if (bar_labels == "Percent") {
+  if (bar_labels == "percent") {
     plot <- plot +
-      ggplot2::geom_text(aes(label = percent_character),
+      ggplot2::geom_text(ggplot2::aes(label = percent_character),
         colour = "white",
-        position = position_stack(0.5),
+        position = ggplot2::position_stack(0.5),
         check_overlap = TRUE
       )
   }
-  if (bar_labels == "Volume") {
+  if (bar_labels == "volume") {
     plot <- plot +
-      ggplot2::geom_text(aes(label = scales::comma(n)),
+      ggplot2::geom_text(ggplot2::aes(label = scales::comma(n)),
         colour = "white",
-        position = position_stack(0.5),
+        position = ggplot2::position_stack(0.5),
         check_overlap = TRUE
       )
   }
