@@ -87,6 +87,28 @@ disp_gt_summary <- function(data, sentiment_var, group_var, max_colours){
 
 }
 
+#' quickly add re-usable theme elements for gt plot funcs
+#'
+#' @return list of ggplot boiler plate theme options
+#' @export
+#'
+#' @examples
+disp_gt_theme <- function(){
+
+  ggplot_theme <- ggplot2::theme(
+    plot.title = ggplot2::element_blank(),
+    panel.background = ggplot2::element_blank(),
+    leegend.position = "null",
+    axis.title = ggplot2::element_blank(),
+    strip.text = ggplot2::element_blank(),
+    panel.grid = ggplot2::element_blank(),
+    axis.text = ggplot2::element_text(size = 30),
+    axis.text.y = ggplot2::element_text(angle = 45,
+                                        hjust = 1),
+    plot.margin = ggplot2::margin(30, 0, 0, 0)
+  )
+}
+
 # summary <- topic_tec %>%
 #   make_gt_summary_table(group_var = name,
 #                         sentiment_var = sentiment)
