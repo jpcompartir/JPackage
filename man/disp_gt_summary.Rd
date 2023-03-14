@@ -9,13 +9,22 @@ disp_gt_summary(
   sentiment_var,
   group_var,
   date_var,
-  sentiment_max_colours = list(positive = "#1b7837", negative = "#762a83")
+  time_unit = c("month", "day", "week", "year", "quarter"),
+  sentiment_max_colours = list(positive = "#1b7837", negative = "#762a83"),
+  icons = NULL,
+  table_title = "Test",
+  source_note = "source_note ="
 )
 }
 \arguments{
 \item{group_var}{Will usually be the name of the topic variable (name or topic)}
 
 \item{sentiment_max_colours}{positive and sentiment classes in lower case}
+
+\item{source_note}{}
+}
+\value{
+a gt object
 }
 \description{
 Function calls various helper functions, @seealso \code{make_gt_gradient_palette},

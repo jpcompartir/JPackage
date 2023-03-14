@@ -29,8 +29,8 @@ load_all()
 ## Summary table generation
 ```{r}
 (
-  summary <- topic_tec %>%
-  make_gt_summary_table(group_var = name,
+  summary <- ls_example %>%
+  make_gt_summary_table(group_var = cluster,
                         sentiment_var = sentiment)
  )
 ```
@@ -44,6 +44,9 @@ load_all()
 )
 ```
 
+```{r}
+ls_example %>% disp_gt_summary(sentiment_var = sentiment, group_var = cluster, date_var = date)
+```
 
 
 #Jamie code

@@ -16,7 +16,7 @@ make_gt_summary_table <- function(data,
   sentiment_sym <- rlang::ensym(sentiment_var)
 
 
-  summary_table <- topic_tech %>%
+  summary_table <- data %>%
     dplyr::count({{group_var}},
                  {{sentiment_var}}) %>%
     dplyr::mutate(volume = sum(n),
@@ -45,30 +45,30 @@ make_gt_summary_table <- function(data,
 make_gt_grad_pal <- function(data, ..., max_colours){
 
   tmp_data <- data %>%
-    select(...)
+    dplyr::select(...)
 
   my_cols <- colnames(tmp_data)
   my_col_names <- sort(my_cols)
 
   col_list <- tmp_data %>%
-    tidyr::pivot_longer(everything(),
+    tidyr::pivot_longer(tidyselect::everything(),
                         names_to = "my_name") %>%
-    group_split(my_name)
+    dplyr::group_split(my_name)
 
   names(col_list) <- my_col_names
 
-  col_list <- map(col_list, ~ .x %>%
-                    summarise(max = max(value),
-                              min = min(value)))
+  col_list <- purrr::map(col_list, ~ .x %>%
+                    dplyr::summarise(max = max(value, na.rm = TRUE),
+                              min = min(value, na.rm = TRUE)))
 
-  col_list <- map2_df(col_list, names(col_list), ~ .x %>%
-                        mutate(variable = .y))
+  col_list <- purrr::map2_df(col_list, names(col_list), ~ .x %>%
+                        dplyr::mutate(variable = .y))
 
   colour_lookup <- tibble::tibble(variable = names(max_colours),
                                   colour_value = max_colours)
 
   colours_df <- col_list %>%
-    left_join(colour_lookup) %>%
+    dplyr::left_join(colour_lookup) %>%
     tidyr::unnest(colour_value) %>%
     dplyr::mutate(base_colour = "#f7f7f7") %>% #Add base colour for both
     tidyr::pivot_longer(cols = c(max, min)) %>% #Reshape data for pamp
@@ -86,8 +86,13 @@ make_gt_grad_pal <- function(data, ..., max_colours){
 #' @param sentiment_var
 #' @param group_var Will usually be the name of the topic variable (name or topic)
 #' @param sentiment_max_colours positive and sentiment classes in lower case
+#' @param date_var
+#' @param time_unit
+#' @param icons
+#' @param table_title
+#' @param source_note
 #'
-#' @return
+#' @return a gt object
 #' @export
 #'
 #' @examples
@@ -108,14 +113,15 @@ disp_gt_summary <- function(data,
   sentiment_sym <- rlang::ensym(sentiment_var)
 
   summary <- data %>%
-    make_gt_summary_table(group_var = !!group_sym,
-                          sentiment_var = !!sentiment_sym)
+    make_gt_summary_table(group_var = {{group_var}},
+                          sentiment_var = {{sentiment_var}})
 
   #Create the palettes for Negative and Positive
   palettes_df <- summary %>%
     make_gt_grad_pal(negative, positive, max_colours = sentiment_max_colours)
 
-  joined_df <- .disp_join_summ_pal(summary, palettes_df)
+  #function breaking here
+  joined_df <- JPackage::disp_join_summ_pal(summary, palettes_df, group_var = {{group_var}})
 
   #Make palettes
   base <- unique(joined_df$base_colour)
@@ -138,8 +144,6 @@ disp_gt_summary <- function(data,
     domain = c(min_neg, max_neg),
     alpha = 0.75
   )
-
-
 
   joined_df <- joined_df %>%
     dplyr::select({{group_var}}, Volume = volume, Positive = positive, Neutral = neutral, Negative = negative) %>%
@@ -176,7 +180,7 @@ disp_gt_summary <- function(data,
         gt::cells_body(columns = `Volume x Time`),
       fn = function(x){
         vol_plot_list %>%
-          gt::ggplot_image(height = px(80),
+          gt::ggplot_image(height = gt::px(80),
                                 aspect_ratio = 2)
       }
       ) %>%
@@ -184,7 +188,7 @@ disp_gt_summary <- function(data,
       locations = gt::cells_body(columns = `Sentiment x Time`),
       fn = function(x){
         sent_plot_list %>%
-          gt::ggplot_image(height = px(80),
+          gt::ggplot_image(height = gt::px(80),
                            aspect_ratio = 2)
       }
     ) %>%
@@ -195,7 +199,7 @@ disp_gt_summary <- function(data,
     gt::opt_table_font("Segoe UI") %>%
     gt::cols_align(align = "center") %>%
     gt::tab_options(
-      column_labels.border.top.width = px(3),
+      column_labels.border.top.width = gt::px(3),
       column_labels.border.top.color = "transparent",
       #Remove border around table
       table.border.top.color = "transparent",
@@ -208,11 +212,11 @@ disp_gt_summary <- function(data,
     gt::tab_style(style = gt::cell_text(color = "grey50",
                                 transform = "capitalize"),
               locations = gt::cells_column_labels(tidyselect::everything())) %>%
-    tab_style(style = gt::cell_text(style = "italic"),
+    gt::tab_style(style = gt::cell_text(style = "italic"),
               locations = gt::cells_stub_grand_summary()) %>%
-    tab_style(style = gt::cell_text(style = "italic"),
+    gt::tab_style(style = gt::cell_text(style = "italic"),
               locations = gt::cells_source_notes()) %>%
-    tab_style(style = gt::cell_text(weight = "600"),
+    gt::tab_style(style = gt::cell_text(weight = "600"),
               locations = gt::cells_grand_summary())
 
 
@@ -220,7 +224,17 @@ disp_gt_summary <- function(data,
 }
 
 
-.disp_join_summ_pal <- function(summary, palettes_df){
+#' Title
+#'
+#' @param summary
+#' @param palettes_df
+#' @param group_var
+#'
+#' @return
+#' @export
+#'
+#' @examples
+disp_join_summ_pal <- function(summary, palettes_df, group_var){
   #THis is hanging by an absolute thread, to be refactored later
 
   joined_df <- summary %>%
@@ -239,8 +253,8 @@ disp_gt_summary <- function(data,
                                    neg_colour_value =  colour_value, neg_min = min, neg_max = max)
 
   joined_df <- splits$negative %>%
-    dplyr::select(name, neg_colour_value, neg_max, neg_min, negative) %>%
-    dplyr::left_join(splits$positive, by = "name")
+    dplyr::select(1, neg_colour_value, neg_max, neg_min, negative) %>%
+    dplyr::left_join(splits$positive)
 
   return(joined_df)
 }
