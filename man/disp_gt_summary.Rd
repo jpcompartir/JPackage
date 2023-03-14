@@ -4,10 +4,18 @@
 \alias{disp_gt_summary}
 \title{Create a gt_summary table fit for use in client briefs}
 \usage{
-disp_gt_summary(data, sentiment_var, group_var, max_colours)
+disp_gt_summary(
+  data,
+  sentiment_var,
+  group_var,
+  date_var,
+  sentiment_max_colours = list(positive = "#1b7837", negative = "#762a83")
+)
 }
 \arguments{
-\item{max_colours}{}
+\item{group_var}{Will usually be the name of the topic variable (name or topic)}
+
+\item{sentiment_max_colours}{positive and sentiment classes in lower case}
 }
 \description{
 Function calls various helper functions, @seealso \code{make_gt_gradient_palette},

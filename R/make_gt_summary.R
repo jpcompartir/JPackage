@@ -22,7 +22,7 @@ make_gt_summary_table <- function(data,
     dplyr::mutate(volume = sum(n),
                   percent = n / sum(n) * 100,
                   .by = {{group_var}}) %>%
-    dplyr::mutate({{sentiment_var}} := stringr::str_to_title({{sentiment_var}})) %>% #Convert POSITIVE -> Positive, positive -> Positive etc.
+    dplyr::mutate({{sentiment_var}} := tolower({{sentiment_var}})) %>% #convert to lower case, can convert back later
     dplyr::select(-n) %>%
     tidyr::pivot_wider(names_from = {{sentiment_var}},
                        values_from = percent)
@@ -67,8 +67,12 @@ make_gt_grad_pal <- function(data, ..., max_colours){
   colour_lookup <- tibble::tibble(variable = names(max_colours),
                                   colour_value = max_colours)
 
-  col_list <- col_list %>%
-    left_join(colour_lookup)
+  colours_df <- col_list %>%
+    left_join(colour_lookup) %>%
+    tidyr::unnest(colour_value) %>%
+    dplyr::mutate(base_colour = "#f7f7f7") %>% #Add base colour for both
+    tidyr::pivot_longer(cols = c(max, min)) %>% #Reshape data for pamp
+    tidyr::pivot_wider(names_from = name, values_from = value) #Finish reshape data for pam
 }
 
 
@@ -80,17 +84,57 @@ make_gt_grad_pal <- function(data, ..., max_colours){
 #'
 #' @param data
 #' @param sentiment_var
-#' @param group_var
-#' @param max_colours
+#' @param group_var Will usually be the name of the topic variable (name or topic)
+#' @param sentiment_max_colours positive and sentiment classes in lower case
 #'
 #' @return
 #' @export
 #'
 #' @examples
-disp_gt_summary <- function(data, sentiment_var, group_var, max_colours){
+disp_gt_summary <- function(data, sentiment_var, group_var, date_var, sentiment_max_colours = list("positive" = "#1b7837", "negative" = "#762a83")){
+
+  date_sym <- rlang::ensym(date_var)
+  group_sym <- rlang::ensym(group_var)
+  sentiment_sym <- rlang::ensym(sentiment_var)
+
+  summary <- data %>%
+    make_gt_summary_table(group_var = !!group_sym,
+                          sentiment_var = !!sentiment_sym)
+
+  #Create the palettes for Negative and Positive
+  palettes_df <- summary %>%
+    make_gt_grad_pal(negative, positive, max_colours = sentiment_max_colours)
+
+  joined_df <- .disp_join_summ_pal(summary, palettes_df)
+
+  return(joined_df)
 
 }
 
+.disp_join_summ_pal <- function(summary, palettes_df){
+  #THis is hanging by an absolute thread, to be refactored later
+
+  joined_df <- summary %>%
+    tidyr::pivot_longer(c(negative, positive),
+                        names_to = "variable") %>%
+    dplyr::left_join(palettes_df)
+
+  names_splits <- sort(unique(joined_df$variable))
+  splits <- dplyr::group_split(joined_df, variable)
+  names(splits) <- names_splits
+
+  splits <- purrr::map(splits, ~ .x %>% tidyr::pivot_wider(names_from = variable, values_from = value))
+
+  splits$positive <- dplyr::rename(splits$positive,  pos_colour_value = colour_value, pos_min = min, pos_max = max)
+  splits$negative <- dplyr::rename(splits$negative,
+                                   neg_colour_value =  colour_value, neg_min = min, neg_max = max)
+
+  joined_df <- splits$negative %>%
+    dplyr::select(name, neg_colour_value, neg_max, neg_min, negative) %>%
+    dplyr::left_join(splits$positive, by = "name")
+
+  return(joined_df)
+}
 
 
 #' quickly add re-usable theme elements for gt plot funcs
