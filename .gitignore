@@ -1,3 +1,5 @@
 .Rproj.user
 ^changelog$
 docs
+.DS_store
+.Rhistory

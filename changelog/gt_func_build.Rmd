@@ -1,0 +1,265 @@
+---
+title: "GT Summary"
+author: "Jack Penzer"
+date: "2023-03-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(devtools)
+library(roxygen2)
+library(pkgdown)
+library(tidyverse)
+library(gt)
+library(gtExtras)
+library(ggplot2)
+library(scales)
+
+roxygenise(clean = TRUE)
+
+load_all()
+```
+
+#Jack testing
+
+## Summary table generation
+```{r}
+(
+  summary <- topic_tec %>%
+  make_gt_summary_table(group_var = name,
+                        sentiment_var = sentiment)
+ )
+```
+
+## Palette generation
+```{r}
+(
+  colours <- summary %>%
+  make_gt_grad_pal(positive, negative, max_colours = c("positive" = "#1b7837",
+                                           "negative" = "#762a83"))
+)
+```
+
+
+
+#Jamie code
+```{r}
+topic_tech_1 <- read_csv("~/Google Drive/My Drive/data_science_project_work/microsoft/project_work/577_joy_in_the_workplace/577_joy_in_workplace/data/tech/topics/topic_1.csv")
+topic_tech_2 <- read_csv("~/Google Drive/My Drive/data_science_project_work/microsoft/project_work/577_joy_in_the_workplace/577_joy_in_workplace/data/tech/topics/topic_2.csv")
+topic_tech_3 <- read_csv("~/Google Drive/My Drive/data_science_project_work/microsoft/project_work/577_joy_in_the_workplace/577_joy_in_workplace/data/tech/topics/topic_3.csv")
+topic_tech_4 <- read_csv("~/Google Drive/My Drive/data_science_project_work/microsoft/project_work/577_joy_in_the_workplace/577_joy_in_workplace/data/tech/topics/topic_4.csv")
+topic_tech_5 <- read_csv("~/Google Drive/My Drive/data_science_project_work/microsoft/project_work/577_joy_in_the_workplace/577_joy_in_workplace/data/tech/topics/topic_5.csv")
+topic_tech <- rbind(topic_tech_1,
+                    topic_tech_2,
+                    topic_tech_3,
+                    topic_tech_4,
+                    topic_tech_5)
+```
+
+## summary - done
+```{r}
+```
+
+## palettes
+```{r}
+min_neg <- min(topic_tech_summary$negative)
+max_neg <- max(topic_tech_summary$negative)
+neg_palette <- col_numeric(c("#f7f7f7", "#762a83"), domain = c(min_neg, max_neg), alpha = 0.75)
+min_pos <- min(topic_tech_summary$positive)
+max_pos <- max(topic_tech_summary$positive)
+pos_palette <- col_numeric(c("#f7f7f7","#1b7837"), domain = c(min_pos, max_pos), alpha = 0.75)
+min_user <- min(topic_tech_summary$user_satisfaction)
+max_user <- max(topic_tech_summary$user_satisfaction)
+user_palette <- col_numeric(c("#f7f7f7","#f7f7f7"), domain = c(min_user, max_user), alpha = 0.75)
+#50E6FF
+```
+
+## gt instantiation
+```{r}
+tab_1 <- topic_tech_summary %>%
+  janitor::clean_names() %>% 
+    mutate(volume_over_time = NA,
+           sent_vol_time = NA,
+           sent_perc_time = NA) %>% 
+  mutate(type = c("file-edit", "cart-shopping", "gamepad", 
+                  "wallet", "smile"),
+         .before = name) %>% 
+  gt %>%
+  # tab_header(title = "Microsoft - 577 Joy in the workplace - Topic Modelling Summary Table") %>%
+  # fmt_number(columns = positive:negative, decimals = 2) %>%
+  # fmt_number(columns = c(volume, 
+                         # rts, 
+                         # favorites
+  ), sep_mark = ",", decimals = 0) %>%
+  # fmt_percent(columns = c(positive, negative, neutral), decimals = 1, scale_values = FALSE) %>%
+  # tab_source_note(source_note = "Data source: Sprinklr, Microsoft.SIP queries") %>%
+  # summary_rows(columns = c(volume, 
+                           # rts,
+                           # favorites
+  ),
+  fns = list(Total = "sum"),
+  decimals = 0,
+  missing_text = "") %>%
+  # data_color(columns = negative,
+             colors = neg_palette) %>%
+  # data_color(columns = positive, colors = pos_palette) %>%
+  # data_color(columns = user_satisfaction, colors = user_palette) %>%
+  # opt_row_striping() %>% 
+  # opt_table_font(font = "Segoe UI") %>%
+  # gt_fa_column(column = type,
+  #              palette = "grey",
+  #              align = "center") %>% 
+  # gt_plt_bar_pct(column = user_satisfaction, scaled = TRUE,
+  #                fill = "#F7B500") %>% 
+  tab_style(style = cell_text(weight = "600"), 
+            locations = cells_title(groups = "title")) %>% 
+  tab_style(style = cell_text(color = "grey50",
+                              transform = "capitalize"), 
+            locations = cells_column_labels(everything())) %>% 
+  tab_style(style = cell_text(style = "italic"), 
+            locations = cells_stub_grand_summary()) %>% 
+  tab_style(style = cell_text(style = "italic"), 
+            locations = cells_source_notes()) %>% 
+  tab_style(style = cell_text(weight = "600"), 
+            locations = cells_grand_summary()) %>% 
+  tab_footnote(
+    footnote = "User satisfaction = positive % + neutral %",
+    locations = cells_column_labels(
+      columns = user_satisfaction)) %>% 
+  cols_label(type = "") %>% 
+    cols_align(align = "center") %>% 
+  tab_options(
+    column_labels.border.top.width = px(3),
+    column_labels.border.top.color = "transparent",
+    #Remove border around table
+    table.border.top.color = "transparent",
+    table.border.bottom.color = "transparent",
+    #Adjust font sizes and alignment
+    source_notes.font.size = 12,
+    heading.align = "left"
+    )
+# tab_1 %>% gtsave("~/Documents/gttable/tab_ggplot_1.png", expand = 20)
+# tab_1 %>% gtsave("~/Documents/gttable/tab_ggplot_2.png")
+# tab_1 %>% gtsave("~/Documents/gttable/tab_ggplot_3.png", expand = -10)
+tab_1 %>% gtsave("~/Documents/gttable/tab_ggplot_4.png", vwidth = 2500, expand = 20)
+```
+
+
+# Jamie funcs
+```{r}
+sent_perc_fun <- function(df, topic) {
+  
+  df %>% 
+    filter(name == topic) %>% 
+    mutate(created_time_date = as.Date(created_time)) %>% 
+    mutate(month = lubridate::floor_date(created_time,
+                                         unit = "month")) %>% 
+    group_by(month, sentiment) %>% 
+    count() %>% 
+    group_by(month) %>% 
+    mutate(perc = n/sum(n)*100,
+           sentiment = tolower(sentiment),
+           month = lubridate::as_date(month)) %>% 
+    ggplot(aes(x = month, y = perc, colour = sentiment)) +
+    geom_line(size = 2) +
+    scale_colour_manual(values = c("#762a83", "grey50", "#1b7837")) +
+    scale_x_date(date_breaks = "4 month",
+                 date_labels = "%b") +
+    scale_y_continuous(labels = scales::label_percent(scale = 1), 
+                       limits = c(0, 100),
+                       breaks = c(0, 100)) + # this should be more automated
+    theme(plot.title = element_blank(),
+          panel.background = element_blank(),
+          legend.position = "null",
+          axis.title = element_blank(),
+          strip.text = element_blank(),
+          panel.grid = element_blank(),
+          axis.text.y = element_text(size = 30),
+          axis.text.x = element_text(angle = 45,
+                                     size = 30,
+                                     hjust = 1),
+          plot.margin = margin(30, 0, 0, 0))
+                       
+}
+```
+
+## Map over all topics make the vol plots
+
+###Volume plots
+```{r}
+splits <- topic_tech %>%
+  group_split(name)
+
+names <- sort(unique(topic_tech$name))
+
+vol_plot_list <- map(splits, ~ .x %>%
+       disp_gt_vot(date_var = created_time, time_unit = "month"))
+
+names(vol_plot_list) <- names
+
+vol_plot_imgs <- map(vol_plot_list, ~ .x %>% 
+      gt::ggplot_image(height = px(80),
+                       aspect_ratio = 2))
+
+names(vol_plot_imgs) <- names
+```
+
+### Sentiment plots
+```{r}
+sent_vol_plots <- map(splits, ~.x %>%
+                        disp_gt_sent_time(sentiment_var = sentiment, date_var = created_time, chart_type = "lines"), time_unit = "month")
+names(sent_vol_plots) <- names
+```
+
+### add plots using the lists and an anonymous func
+```{r}
+gt_summary <- summary %>%
+  mutate(plot_vols = " ",
+         sent_plots = " ") %>%
+  gt() %>%
+  text_transform(locations = cells_body(
+    columns = plot_vols),
+    fn = function(x){
+      vol_plot_list %>%
+        ggplot_image(height = px(80),
+                     aspect_ratio =2)
+    })
+```
+
+
+```{r}
+gt_summary <- gt_summary %>%
+  text_transform(locations = cells_body(
+    columns = sent_plots),
+    fn = function(x){
+      sent_vol_plots %>%
+        ggplot_image(height = px(80),
+                     aspect_ratio = 2)
+    }
+    )
+```
+
+
+# After lunch add a % option to sent function
+Then make the gt programmtically with the palette fills
+Investigate gt NSE/Tidy eval(?_)
+
+```{r}
+topic_tech %>%
+  disp_gt_summary(sentiment_var = sentiment,
+                  group_var = name,
+                  date_var = date)
+colours
+```
+
+```{r}
+summary %>% pivot_longer(c(negative, positive), names_to = "variable") %>%
+  left_join(colours)
+```
+
+
+How do we go from the palettes in a data frame, to being gt col_numerics, to data_colour. Seems like a job for pmap 
