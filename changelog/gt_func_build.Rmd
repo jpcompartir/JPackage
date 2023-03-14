@@ -89,32 +89,32 @@ tab_1 <- topic_tech_summary %>%
                   "wallet", "smile"),
          .before = name) %>% 
   gt %>%
-  tab_header(title = "Microsoft - 577 Joy in the workplace - Topic Modelling Summary Table") %>%
+  # tab_header(title = "Microsoft - 577 Joy in the workplace - Topic Modelling Summary Table") %>%
   # fmt_number(columns = positive:negative, decimals = 2) %>%
-  fmt_number(columns = c(volume, 
+  # fmt_number(columns = c(volume, 
                          # rts, 
                          # favorites
   ), sep_mark = ",", decimals = 0) %>%
-  fmt_percent(columns = c(positive, negative, neutral), decimals = 1, scale_values = FALSE) %>%
-  tab_source_note(source_note = "Data source: Sprinklr, Microsoft.SIP queries") %>%
-  summary_rows(columns = c(volume, 
+  # fmt_percent(columns = c(positive, negative, neutral), decimals = 1, scale_values = FALSE) %>%
+  # tab_source_note(source_note = "Data source: Sprinklr, Microsoft.SIP queries") %>%
+  # summary_rows(columns = c(volume, 
                            # rts,
                            # favorites
   ),
   fns = list(Total = "sum"),
   decimals = 0,
   missing_text = "") %>%
-  data_color(columns = negative,
+  # data_color(columns = negative,
              colors = neg_palette) %>%
-  data_color(columns = positive, colors = pos_palette) %>%
+  # data_color(columns = positive, colors = pos_palette) %>%
   # data_color(columns = user_satisfaction, colors = user_palette) %>%
   # opt_row_striping() %>% 
-  opt_table_font(font = "Segoe UI") %>%
-  gt_fa_column(column = type,
-               palette = "grey",
-               align = "center") %>% 
-  gt_plt_bar_pct(column = user_satisfaction, scaled = TRUE,
-                 fill = "#F7B500") %>% 
+  # opt_table_font(font = "Segoe UI") %>%
+  # gt_fa_column(column = type,
+  #              palette = "grey",
+  #              align = "center") %>% 
+  # gt_plt_bar_pct(column = user_satisfaction, scaled = TRUE,
+  #                fill = "#F7B500") %>% 
   tab_style(style = cell_text(weight = "600"), 
             locations = cells_title(groups = "title")) %>% 
   tab_style(style = cell_text(color = "grey50",
@@ -141,16 +141,7 @@ tab_1 <- topic_tech_summary %>%
     #Adjust font sizes and alignment
     source_notes.font.size = 12,
     heading.align = "left"
-    ) %>% 
-    text_transform(
-    locations = cells_body(columns = volume_over_time,
-                           rows = name == "topic_1"),
-    fn = function(x) {
-      plot_1 %>%
-        ggplot_image(height = px(80),
-                     aspect_ratio = 2)
-    }
-)
+    )
 # tab_1 %>% gtsave("~/Documents/gttable/tab_ggplot_1.png", expand = 20)
 # tab_1 %>% gtsave("~/Documents/gttable/tab_ggplot_2.png")
 # tab_1 %>% gtsave("~/Documents/gttable/tab_ggplot_3.png", expand = -10)
@@ -262,5 +253,13 @@ topic_tech %>%
   disp_gt_summary(sentiment_var = sentiment,
                   group_var = name,
                   date_var = date)
+colours
 ```
 
+```{r}
+summary %>% pivot_longer(c(negative, positive), names_to = "variable") %>%
+  left_join(colours)
+```
+
+
+How do we go from the palettes in a data frame, to being gt col_numerics, to data_colour. Seems like a job for pmap 

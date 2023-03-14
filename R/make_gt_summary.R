@@ -91,7 +91,17 @@ make_gt_grad_pal <- function(data, ..., max_colours){
 #' @export
 #'
 #' @examples
-disp_gt_summary <- function(data, sentiment_var, group_var, date_var, sentiment_max_colours = list("positive" = "#1b7837", "negative" = "#762a83")){
+disp_gt_summary <- function(data,
+                            sentiment_var,
+                            group_var,
+                            date_var,
+                            time_unit = c("month", "day", "week", "year", "quarter"),
+                            sentiment_max_colours = list("positive" = "#1b7837", "negative" = "#762a83"),
+                            icons = NULL,
+                            table_title = "Test",
+                            source_note = "source_note ="){
+
+  time_unit <- match.arg(time_unit)
 
   date_sym <- rlang::ensym(date_var)
   group_sym <- rlang::ensym(group_var)
@@ -107,9 +117,108 @@ disp_gt_summary <- function(data, sentiment_var, group_var, date_var, sentiment_
 
   joined_df <- .disp_join_summ_pal(summary, palettes_df)
 
-  return(joined_df)
+  #Make palettes
+  base <- unique(joined_df$base_colour)
 
+  max_pos <- unique(joined_df$pos_max)
+  min_pos <- unique(joined_df$pos_min)
+  pos_colour <- unique(joined_df$pos_colour_value)
+  pos_palette <- scales::col_numeric(
+    c(base, pos_colour),
+    domain = c(min_pos, max_pos),
+    alpha = 0,75
+  )
+
+  max_neg <- unique(joined_df$neg_max)
+  min_neg <- unique(joined_df$neg_min)
+  neg_colour <- unique(joined_df$neg_colour_value)
+
+  neg_palette <- scales::col_numeric(
+    c(base, neg_colour),
+    domain = c(min_neg, max_neg),
+    alpha = 0.75
+  )
+
+
+
+  joined_df <- joined_df %>%
+    dplyr::select({{group_var}}, Volume = volume, Positive = positive, Neutral = neutral, Negative = negative) %>%
+    dplyr::mutate(`Volume x Time` = "",
+                  `Sentiment x Time` = "")
+
+  # Space for adding icons here
+  if(!is.null(icons)){
+    dplyr::mutate(joined_df, icons = icons, .before = 1)
+  }
+
+  table <- joined_df %>%
+    gt::gt()
+
+  #There is a chance that group_splitting this way doesn't work if the factors are re-ordered, I think?
+  splits <-  dplyr::group_split(data, {{group_var}})
+  vol_plot_list <-purrr::map(splits, ~.x %>%
+                 disp_gt_vot(date_var = {{date_var}}, time_unit = time_unit))
+
+  sent_plot_list <- purrr::map(splits, ~ .x %>%
+                                 disp_gt_sent_time(date_var = {{date_var}}, sentiment_var = {{sentiment_var}}, time_unit = time_unit))
+
+  table <- table %>%
+    gt::data_color(columns = Positive,
+                   colors = pos_palette) %>%
+    gt::data_color(columns = Negative,
+                   colors = neg_palette) %>%
+    gt::summary_rows(columns = c(Volume),
+                     fns = list(Total = "sum"),
+                     decimals = 0,
+                     missing_text = "") %>%
+    gt::text_transform(
+      locations =
+        gt::cells_body(columns = `Volume x Time`),
+      fn = function(x){
+        vol_plot_list %>%
+          gt::ggplot_image(height = px(80),
+                                aspect_ratio = 2)
+      }
+      ) %>%
+    gt::text_transform(
+      locations = gt::cells_body(columns = `Sentiment x Time`),
+      fn = function(x){
+        sent_plot_list %>%
+          gt::ggplot_image(height = px(80),
+                           aspect_ratio = 2)
+      }
+    ) %>%
+    gt::tab_header(title = table_title) %>%
+    gt::tab_source_note(source_note = source_note) %>%
+    gt::fmt_number(columns = Volume, sep_mark = ",", decimals = 0) %>%
+    gt::fmt_percent(columns = c(Positive, Negative, Neutral), decimals = 1, scale_values = FALSE) %>%
+    gt::opt_table_font("Segoe UI") %>%
+    gt::cols_align(align = "center") %>%
+    gt::tab_options(
+      column_labels.border.top.width = px(3),
+      column_labels.border.top.color = "transparent",
+      #Remove border around table
+      table.border.top.color = "transparent",
+      table.border.bottom.color = "transparent",
+      #Adjust font sizes and alignment
+      source_notes.font.size = 12,
+      heading.align = "left") %>%
+    gt::tab_style(style = gt::cell_text(weight = "600"),
+              locations = gt::cells_title(groups = "title")) %>%
+    gt::tab_style(style = gt::cell_text(color = "grey50",
+                                transform = "capitalize"),
+              locations = gt::cells_column_labels(tidyselect::everything())) %>%
+    tab_style(style = gt::cell_text(style = "italic"),
+              locations = gt::cells_stub_grand_summary()) %>%
+    tab_style(style = gt::cell_text(style = "italic"),
+              locations = gt::cells_source_notes()) %>%
+    tab_style(style = gt::cell_text(weight = "600"),
+              locations = gt::cells_grand_summary())
+
+
+  return(table)
 }
+
 
 .disp_join_summ_pal <- function(summary, palettes_df){
   #THis is hanging by an absolute thread, to be refactored later
