@@ -77,3 +77,7 @@ spam_grams changes, better parallelisation and better selection of spammy n-gram
 
 Tue 20th Dec -
 Add plot_save and folder_setup functions
+
+
+Tue 24th March -
+building make_gt_summary function
